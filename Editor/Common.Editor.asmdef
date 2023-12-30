@@ -1,0 +1,19 @@
+{
+    "name": "Common.Editor",
+    "rootNamespace": "",
+    "references": [
+        "Common.Runtime",
+        "Common.Unity"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

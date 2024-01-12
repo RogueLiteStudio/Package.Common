@@ -25,10 +25,14 @@ public class NetJsonUtil
 
     class JsonPublicContractResolver : DefaultContractResolver
     {
-
-        protected override IList<JsonProperty> CreateProperties(System.Type type, MemberSerialization memberSerialization)
+        protected override JsonProperty CreateProperty(System.Reflection.MemberInfo member, MemberSerialization memberSerialization)
         {
-            return base.CreateProperties(type, MemberSerialization.OptOut).ToList().FindAll(it => it.Writable && !it.Ignored);
+            var property = base.CreateProperty(member, MemberSerialization.OptOut);
+            if (member.MemberType != System.Reflection.MemberTypes.Field)
+            {
+                property.ShouldSerialize =  _ => false;
+            }
+            return property;
         }
     }
 
@@ -39,7 +43,7 @@ public class NetJsonUtil
         ContractResolver = new JsonPublicContractResolver()
     };
 
-    public static string ToJson<T>(T val, bool indented, bool onlyPublicField = false)
+    public static string ToJson<T>(T val, bool indented = true , bool onlyPublicField = true)
     {
         return JsonConvert.SerializeObject(val, indented ? Formatting.Indented : Formatting.None, onlyPublicField ? _jsonSerializerPublicFieldSettings : _jsonSerializerWriteableSettings);
     }

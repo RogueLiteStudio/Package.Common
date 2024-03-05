@@ -19,8 +19,9 @@ public enum DragStateType
 
 public class DragManipulator : MouseManipulator
 {
-    private DragStateType dragState;
+    private DragStateType dragState = DragStateType.End;
     private Vector2 mouseDownPosition;
+    private bool isDown;
 
     private readonly System.Action<DragEventData> OnDragEvent;
 
@@ -47,6 +48,7 @@ public class DragManipulator : MouseManipulator
     {
         if (evt.button == 0)
         {
+            isDown = true;
             dragState = DragStateType.Start;
             mouseDownPosition = evt.localMousePosition;
             target.CaptureMouse();
@@ -56,7 +58,7 @@ public class DragManipulator : MouseManipulator
 
     private void OnMouseMove(MouseMoveEvent evt)
     {
-        if (dragState != DragStateType.End)
+        if (isDown)
         {
             var ed = new DragEventData
             {
@@ -75,9 +77,9 @@ public class DragManipulator : MouseManipulator
     {
         if (evt.button == 0)
         {
+            isDown = false;
             if (dragState == DragStateType.Move)
             {
-                dragState = DragStateType.End;
                 var ed = new DragEventData
                 {
                     StartMousePosition = mouseDownPosition,

@@ -4,7 +4,12 @@ namespace PropertyEditor
 {
     public interface IPropertyElement
     {
-        VisualElement Build(string label, object val, IPropertyEditorContext context);
-        void Refresh();
+        VisualElement Element { get; }
+        void Bind(string label, IPropertyEditorContext context);
+        void SetValue(object value);
+        object GetValue();
+        void SetLabelMinWidth(float minWidth);
+        void SetLabelActive(bool active);
+        void SetReadOnly(bool readOnly);
     }
 }

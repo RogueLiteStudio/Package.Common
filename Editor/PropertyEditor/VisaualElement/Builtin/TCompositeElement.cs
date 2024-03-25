@@ -8,9 +8,10 @@ namespace PropertyEditor
         private readonly T inputField = new T();
         public VisualElement Element => inputField;
 
-        public void Bind(string label, IPropertyEditorContext context)
+        public void Bind(string label, string toolTip, IPropertyEditorContext context)
         {
             inputField.label = label;
+            inputField.tooltip = toolTip;
             inputField.RegisterValueChangedCallback((evt) => context.OnPropertyModify());
         }
 
@@ -36,7 +37,7 @@ namespace PropertyEditor
 
         public void SetValue(object value)
         {
-            inputField.value = (TValueType)value;
+            inputField.SetValueWithoutNotify((TValueType)value);
         }
     }
 }

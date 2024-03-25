@@ -19,7 +19,7 @@ namespace PropertyEditor
             var validFunc = info.GetCustomAttribute<ValidFuncAttribute>();
             if (validFunc != null)
             {
-                ValidMethod = info.DeclaringType.GetMethod(validFunc.Name);
+                ValidMethod = info.DeclaringType.GetMethod(validFunc.Name); 
             }
         }
 

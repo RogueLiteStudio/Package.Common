@@ -9,12 +9,14 @@ namespace PropertyEditor
         private Quaternion Value = Quaternion.identity;
         public VisualElement Element => inputField;
 
-        public void Bind(string label, IPropertyEditorContext context)
+        public void Bind(string label, string toolTip, IPropertyEditorContext context)
         {
             inputField.label = label;
+            inputField.tooltip = toolTip;
             inputField.RegisterValueChangedCallback((evt) => 
             {
                 Value = Quaternion.Euler(evt.newValue);
+                inputField.SetValueWithoutNotify(Value.eulerAngles);
                 context.OnPropertyModify();
             });
         }

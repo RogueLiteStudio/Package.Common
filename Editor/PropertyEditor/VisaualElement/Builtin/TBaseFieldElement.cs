@@ -7,9 +7,10 @@ namespace PropertyEditor
         private readonly T field = new T();
         public VisualElement Element => field;
 
-        public void Bind(string label, IPropertyEditorContext context)
+        public void Bind(string label, string toolTip, IPropertyEditorContext context)
         {
             field.label = label;
+            field.tooltip = toolTip;
             field.RegisterValueChangedCallback((evt) => context.OnPropertyModify());
         }
 
@@ -35,7 +36,7 @@ namespace PropertyEditor
 
         public void SetValue(object value)
         {
-            field.value = (TValue)value;
+            field.SetValueWithoutNotify((TValue)value);
         }
     }
 }

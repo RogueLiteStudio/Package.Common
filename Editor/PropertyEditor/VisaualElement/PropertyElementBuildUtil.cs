@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 using UnityEditor.UIElements;
 using UnityEngine;
@@ -8,6 +9,46 @@ namespace PropertyEditor
 {
     public static class PropertyElementBuildUtil
     {
+        private static Dictionary<Type, Type> drawerTypes;
+        private static void CollectorCustomBuildType()
+        {
+            drawerTypes = new Dictionary<Type, Type>();
+            Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            foreach (var assembly in assemblies)
+            {
+                if (assembly.FullName.StartsWith("Unity")
+                    || assembly.FullName.StartsWith("com.unity")
+                    || assembly.FullName.StartsWith("System")
+                    || assembly.FullName.StartsWith("mscorlib"))
+                {
+                    continue;
+                }
+                Type[] types = assembly.GetTypes();
+                foreach (var type in types)
+                {
+                    if (type.IsAbstract || type.IsInterface || type.IsGenericType)
+                        continue;
+                    if (!typeof(IPropertyElement).IsAssignableFrom(type))
+                        continue;
+                    var baseType = type.BaseType;
+                    while (baseType != null)
+                    {
+                        if (baseType.IsGenericType)
+                        {
+                            drawerTypes[baseType.GenericTypeArguments[0]] = type;
+                            break;
+                        }
+                        baseType = baseType.BaseType;
+                    }
+                }
+            }
+        }
+
+        public static IPropertyElement CreateByCustomBuilder(Type type)
+        {
+            return null;
+        }
+
         private static IPropertyElement CreateByNumberType(Type type)
         {
             switch (Type.GetTypeCode(type))

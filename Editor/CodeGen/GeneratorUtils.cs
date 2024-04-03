@@ -45,6 +45,11 @@ namespace CodeGen
             return type.FullName;
         }
 
+        public static string ToTypeName<T>()
+        {
+            return TypeToName(typeof(T));   
+        }
+
         //写入文件，如果写入的内容和已经存在的一致就不再写入，防止文件被修改导致Unity重新编译
         public static void WriteToFile(string filePath, string context)
         {

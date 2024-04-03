@@ -31,28 +31,40 @@ internal static class CommandExecuteGenerator
 
         string bindPath = System.IO.Path.Combine(path, $"{typeof(TExecute).Name}Binder.cs");
         CSharpCodeWriter writer = new CSharpCodeWriter();
+        writer.WriteLine("using System.Collections.Generic;");
+        string baseExecuteName = GeneratorUtils.ToTypeName<TExecute>();
         using (new CSharpCodeWriter.Scop(writer, $"public static class {typeof(TExecute).Name}Binder"))
         {
-            foreach (var t in info.Types)
+            using (new CSharpCodeWriter.Scop(writer, $"public static readonly Dictionary<int, {baseExecuteName}> executes = new Dictionary<int, {baseExecuteName}>()", true))
             {
-                var name = t.Name;
-                if (name.EndsWith("Command"))
+                foreach (var t in info.Types)
                 {
-                    name = name.Substring(0, name.Length - 7);
+                    string typeName = GeneratorUtils.TypeToName(t);
+                    string name = t.Name;
+                    if (name.EndsWith("Command"))
+                    {
+                        name = name.Substring(0, name.Length - 7);
+                    }
+                    string className = $"{nameSpace}.{name}Execute";
+                    writer.WriteLine($"{{CommandIdentity<{typeName}>.Id, new {className}() }},");
                 }
-                string className = $"{name}Execute";
-                writer.WriteLine($"CommandBinder.Bind<{GeneratorUtils.TypeToName(t)}, {className}>();");
+            }
+            using(new CSharpCodeWriter.Scop(writer, $"public static {baseExecuteName} GetExecuter(int commandId)"))
+            {
+                writer.WriteLine("executes.TryGetValue(commandId, out var execute);");
+                writer.WriteLine("return execute;");
             }
         }
+        FileUtil.WriteFile(bindPath, writer.ToString());
     }
 
     private static string ToExecute(Type type, string nameSpace, string className, string baseClassName, string exeContextName)
     {
         var typeName = GeneratorUtils.TypeToName(type);
         CSharpCodeWriter writer = new CSharpCodeWriter();
-        if (typeName.StartsWith(nameSpace))
+        if (typeName.StartsWith(nameSpace + "."))
         {
-            typeName = typeName.Substring(nameSpace.Length + 1);
+            typeName = typeName.Substring(nameSpace.Length + 2);
         }
 
         using(new CSharpCodeWriter.NameSpaceScop(writer, nameSpace))
@@ -61,7 +73,7 @@ internal static class CommandExecuteGenerator
             {
                 using (new CSharpCodeWriter.Scop(writer, $"protected override void OnExecute({exeContextName} context, {typeName} command)"))
                 {
-                    writer.WriteLine($"//TODO: Implement {className}.OnExecute");
+                    writer.WriteLine("throw new System.NotImplementedException();");
                 }
             }
         }

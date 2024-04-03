@@ -13,7 +13,7 @@ internal static class CommandExternGenerator
         CSharpCodeWriter writer = new CSharpCodeWriter();
         using (new CSharpCodeWriter.Scop(writer, $"public static partial class {info.ContextName}Extern"))
         {
-            using (new CSharpCodeWriter.Scop(writer, $"pubilic static {info.ContextName}Extern()"))
+            using (new CSharpCodeWriter.Scop(writer, "public static void Init()"))
             {
                 int idx = 1;
                 foreach (var type in info.Types)
@@ -55,11 +55,11 @@ internal static class CommandExternGenerator
         }
         else
         {
-            paramList = $"this ICommandReceiver receiver, {paramList}";
+            paramList = $"this ICommandReceiver receiver{paramList}";
         }
         using (new CSharpCodeWriter.Scop(writer, $"public static void Add{name}({paramList})"))
         {
-            writer.WriteLine($"var cmd = reciver.CreateCommand<{typeName}>();");
+            writer.WriteLine($"var cmd = receiver.CreateCommand<{typeName}>();");
             writer.WriteLine("if(cmd == null) return;");
             var fields = type.GetFields(BindingFlags.Public | BindingFlags.Instance);
             foreach (var f in fields)

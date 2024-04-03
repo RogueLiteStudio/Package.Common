@@ -14,23 +14,30 @@ namespace CodeGen
         public struct Scop : IDisposable
         {
             private readonly CSharpCodeWriter writer;
+            private readonly bool withSemicolon;
 
-            public Scop(CSharpCodeWriter writer, string lineContent)
+            public Scop(CSharpCodeWriter writer, string lineContent, bool withSemicolon = false)
             {
                 writer.WriteLine(lineContent);
                 writer.BeginScope();
                 this.writer = writer;
+                this.withSemicolon = withSemicolon;
             }
 
-            public Scop(CSharpCodeWriter writer)
+            public Scop(CSharpCodeWriter writer, bool withSemicolon = false)
             {
                 writer.BeginScope();
                 this.writer = writer;
+                this.withSemicolon = withSemicolon;
             }
 
             public void Dispose()
             {
                 writer.EndScope();
+                if (withSemicolon)
+                {
+                    writer.Append(";");
+                }
             }
 
         }

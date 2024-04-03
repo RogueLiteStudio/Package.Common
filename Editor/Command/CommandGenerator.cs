@@ -19,6 +19,8 @@ public static class CommandGenerator
         info.CommandBaseType = typeof(TCommand);
         info.ContextName = typeof(TCommand).Name;
         CommandExternGenerator.GenExtern(externPayh, info);
+
+        CommandExecuteGenerator.Gen<TExecuteContext, TExecute>(info, executePath);
     }
 
 }

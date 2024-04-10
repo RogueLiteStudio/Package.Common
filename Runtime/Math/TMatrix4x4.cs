@@ -20,9 +20,7 @@
 namespace TrueSync
 {
 
-    /// <summary>
-    /// 3x3 Matrix.
-    /// </summary>
+    [System.Serializable]
     public struct TMatrix4x4
     {
         /// <summary>

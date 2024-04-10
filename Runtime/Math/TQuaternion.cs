@@ -18,6 +18,7 @@
 */
 
 using System;
+using System.Runtime.CompilerServices;
 
 namespace TrueSync
 {
@@ -26,32 +27,83 @@ namespace TrueSync
     /// A Quaternion representing an orientation.
     /// </summary>
     [Serializable]
-    public struct TQuaternion
+    public struct TQuaternion : IEquatable<TQuaternion>
     {
 
-        /// <summary>The X component of the quaternion.</summary>
         public TFloat x;
-        /// <summary>The Y component of the quaternion.</summary>
         public TFloat y;
-        /// <summary>The Z component of the quaternion.</summary>
         public TFloat z;
-        /// <summary>The W component of the quaternion.</summary>
         public TFloat w;
-
-        public static readonly TQuaternion identity;
-
-        static TQuaternion()
+        private static readonly TQuaternion identityQuaternion = new TQuaternion(TFloat.Zero, TFloat.Zero, TFloat.Zero, TFloat.One);
+        public TFloat this[int index]
         {
-            identity = new TQuaternion(0, 0, 0, 1);
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get
+            {
+                return index switch
+                {
+                    0 => x,
+                    1 => y,
+                    2 => z,
+                    3 => w,
+                    _ => throw new IndexOutOfRangeException("Invalid Quaternion index!"),
+                };
+            }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set
+            {
+                switch (index)
+                {
+                    case 0:
+                        x = value;
+                        break;
+                    case 1:
+                        y = value;
+                        break;
+                    case 2:
+                        z = value;
+                        break;
+                    case 3:
+                        w = value;
+                        break;
+                    default:
+                        throw new IndexOutOfRangeException("Invalid Quaternion index!");
+                }
+            }
+        }
+        public static TQuaternion identity
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get
+            {
+                return identityQuaternion;
+            }
         }
 
-        /// <summary>
-        /// Initializes a new instance of the JQuaternion structure.
-        /// </summary>
-        /// <param name="x">The X component of the quaternion.</param>
-        /// <param name="y">The Y component of the quaternion.</param>
-        /// <param name="z">The Z component of the quaternion.</param>
-        /// <param name="w">The W component of the quaternion.</param>
+        public TVector3 eulerAngles
+        {
+            get
+            {
+                TVector3 result = new TVector3();
+
+                TFloat ysqr = y * y;
+                TFloat t0 = -2 * (ysqr + z * z) + TFloat.One;
+                TFloat t1 = 2 * (x * y - w * z);
+                TFloat t2 = -2 * (x * z + w * y);
+                TFloat t3 = 2 * (y * z - w * x);
+                TFloat t4 = -2 * (x * x + ysqr) + TFloat.One;
+
+                t2 = t2 > TFloat.One ? TFloat.One : t2;
+                t2 = t2 < -TFloat.One ? -TFloat.One : t2;
+
+                result.x = TFloat.Atan2(t3, t4) * TFloat.Rad2Deg;
+                result.y = TFloat.Asin(t2) * TFloat.Rad2Deg;
+                result.z = TFloat.Atan2(t1, t0) * TFloat.Rad2Deg;
+
+                return result * -TFloat.One;
+            }
+        }
+
         public TQuaternion(TFloat x, TFloat y, TFloat z, TFloat w)
         {
             this.x = x;
@@ -66,36 +118,6 @@ namespace TrueSync
             y = new_y;
             z = new_z;
             w = new_w;
-        }
-
-        public void SetFromToRotation(TVector3 fromDirection, TVector3 toDirection)
-        {
-            TQuaternion targetRotation = FromToRotation(fromDirection, toDirection);
-            Set(targetRotation.x, targetRotation.y, targetRotation.z, targetRotation.w);
-        }
-
-        public TVector3 eulerAngles
-        {
-            get
-            {
-                TVector3 result = new TVector3();
-
-                TFloat ysqr = y * y;
-                TFloat t0 = -2.0f * (ysqr + z * z) + 1.0f;
-                TFloat t1 = +2.0f * (x * y - w * z);
-                TFloat t2 = -2.0f * (x * z + w * y);
-                TFloat t3 = +2.0f * (y * z - w * x);
-                TFloat t4 = -2.0f * (x * x + ysqr) + 1.0f;
-
-                t2 = t2 > 1.0f ? 1.0f : t2;
-                t2 = t2 < -1.0f ? -1.0f : t2;
-
-                result.x = TFloat.Atan2(t3, t4) * TFloat.Rad2Deg;
-                result.y = TFloat.Asin(t2) * TFloat.Rad2Deg;
-                result.z = TFloat.Atan2(t1, t0) * TFloat.Rad2Deg;
-
-                return result * -1;
-            }
         }
 
         public static TFloat Angle(TQuaternion a, TQuaternion b)
@@ -113,18 +135,6 @@ namespace TrueSync
             return angle;
         }
 
-        /// <summary>
-        /// Quaternions are added.
-        /// </summary>
-        /// <param name="quaternion1">The first quaternion.</param>
-        /// <param name="quaternion2">The second quaternion.</param>
-        /// <returns>The sum of both quaternions.</returns>
-        public static TQuaternion Add(TQuaternion quaternion1, TQuaternion quaternion2)
-        {
-            Add(ref quaternion1, ref quaternion2, out TQuaternion result);
-            return result;
-        }
-
         public static TQuaternion LookRotation(TVector3 forward)
         {
             return CreateFromMatrix(TMatrix.LookAt(forward, TVector3.up));
@@ -137,44 +147,19 @@ namespace TrueSync
 
         public static TQuaternion Slerp(TQuaternion from, TQuaternion to, TFloat t)
         {
-            t = TMath.Clamp(t, 0, 1);
+            t = TMath.Clamp(t, TFloat.Zero, TFloat.One);
 
             TFloat dot = Dot(from, to);
 
-            if (dot < 0.0f)
+            if (dot < TFloat.Zero)
             {
-                to = Multiply(to, -1);
+                to = Multiply(to, -TFloat.One);
                 dot = -dot;
             }
 
             TFloat halfTheta = TFloat.Acos(dot);
 
-            return Multiply(Multiply(from, TFloat.Sin((1 - t) * halfTheta)) + Multiply(to, TFloat.Sin(t * halfTheta)), 1 / TFloat.Sin(halfTheta));
-        }
-
-        public static TQuaternion RotateTowards(TQuaternion from, TQuaternion to, TFloat maxDegreesDelta)
-        {
-            TFloat dot = Dot(from, to);
-
-            if (dot < 0.0f)
-            {
-                to = Multiply(to, -1);
-                dot = -dot;
-            }
-
-            TFloat halfTheta = TFloat.Acos(dot);
-            TFloat theta = halfTheta * 2;
-
-            maxDegreesDelta *= TFloat.Deg2Rad;
-
-            if (maxDegreesDelta >= theta)
-            {
-                return to;
-            }
-
-            maxDegreesDelta /= theta;
-
-            return Multiply(Multiply(from, TFloat.Sin((1 - maxDegreesDelta) * halfTheta)) + Multiply(to, TFloat.Sin(maxDegreesDelta * halfTheta)), 1 / TFloat.Sin(halfTheta));
+            return Multiply(Multiply(from, TFloat.Sin((TFloat.One - t) * halfTheta)) + Multiply(to, TFloat.Sin(t * halfTheta)), TFloat.One / TFloat.Sin(halfTheta));
         }
 
         public static TQuaternion Euler(TFloat x, TFloat y, TFloat z)
@@ -211,7 +196,7 @@ namespace TrueSync
             return rotation;
         }
 
-        public static void CreateFromYawPitchRoll(TFloat yaw, TFloat pitch, TFloat roll, out TQuaternion result)
+        private static void CreateFromYawPitchRoll(TFloat yaw, TFloat pitch, TFloat roll, out TQuaternion result)
         {
             TFloat num9 = roll * TFloat.Half;
             TFloat num6 = TFloat.Sin(num9);
@@ -228,12 +213,6 @@ namespace TrueSync
             result.w = ((num * num3) * num5) + ((num2 * num4) * num6);
         }
 
-        /// <summary>
-        /// Quaternions are added.
-        /// </summary>
-        /// <param name="quaternion1">The first quaternion.</param>
-        /// <param name="quaternion2">The second quaternion.</param>
-        /// <param name="result">The sum of both quaternions.</param>
         public static void Add(ref TQuaternion quaternion1, ref TQuaternion quaternion2, out TQuaternion result)
         {
             result.x = quaternion1.x + quaternion2.x;
@@ -282,74 +261,10 @@ namespace TrueSync
 
         public static TQuaternion LerpUnclamped(TQuaternion a, TQuaternion b, TFloat t)
         {
-            TQuaternion result = Multiply(a, 1 - t) + Multiply(b, t);
+            TQuaternion result = Multiply(a, TFloat.One - t) + Multiply(b, t);
             result.Normalize();
 
             return result;
-        }
-
-        /// <summary>
-        /// Quaternions are subtracted.
-        /// </summary>
-        /// <param name="quaternion1">The first quaternion.</param>
-        /// <param name="quaternion2">The second quaternion.</param>
-        /// <returns>The difference of both quaternions.</returns>
-        public static TQuaternion Subtract(TQuaternion quaternion1, TQuaternion quaternion2)
-        {
-            Subtract(ref quaternion1, ref quaternion2, out TQuaternion result);
-            return result;
-        }
-
-        /// <summary>
-        /// Quaternions are subtracted.
-        /// </summary>
-        /// <param name="quaternion1">The first quaternion.</param>
-        /// <param name="quaternion2">The second quaternion.</param>
-        /// <param name="result">The difference of both quaternions.</param>
-        public static void Subtract(ref TQuaternion quaternion1, ref TQuaternion quaternion2, out TQuaternion result)
-        {
-            result.x = quaternion1.x - quaternion2.x;
-            result.y = quaternion1.y - quaternion2.y;
-            result.z = quaternion1.z - quaternion2.z;
-            result.w = quaternion1.w - quaternion2.w;
-        }
-
-        /// <summary>
-        /// Multiply two quaternions.
-        /// </summary>
-        /// <param name="quaternion1">The first quaternion.</param>
-        /// <param name="quaternion2">The second quaternion.</param>
-        /// <returns>The product of both quaternions.</returns>
-        public static TQuaternion Multiply(TQuaternion quaternion1, TQuaternion quaternion2)
-        {
-            Multiply(ref quaternion1, ref quaternion2, out TQuaternion result);
-            return result;
-        }
-
-        /// <summary>
-        /// Multiply two quaternions.
-        /// </summary>
-        /// <param name="quaternion1">The first quaternion.</param>
-        /// <param name="quaternion2">The second quaternion.</param>
-        /// <param name="result">The product of both quaternions.</param>
-        public static void Multiply(ref TQuaternion quaternion1, ref TQuaternion quaternion2, out TQuaternion result)
-        {
-            TFloat x = quaternion1.x;
-            TFloat y = quaternion1.y;
-            TFloat z = quaternion1.z;
-            TFloat w = quaternion1.w;
-            TFloat num4 = quaternion2.x;
-            TFloat num3 = quaternion2.y;
-            TFloat num2 = quaternion2.z;
-            TFloat num = quaternion2.w;
-            TFloat num12 = (y * num2) - (z * num3);
-            TFloat num11 = (z * num4) - (x * num2);
-            TFloat num10 = (x * num3) - (y * num4);
-            TFloat num9 = ((x * num4) + (y * num3)) + (z * num2);
-            result.x = ((x * num) + (num4 * w)) + num12;
-            result.y = ((y * num) + (num3 * w)) + num11;
-            result.z = ((z * num) + (num2 * w)) + num10;
-            result.w = (w * num) - num9;
         }
 
         /// <summary>
@@ -358,7 +273,7 @@ namespace TrueSync
         /// <param name="quaternion1">The quaternion to scale.</param>
         /// <param name="scaleFactor">Scale factor.</param>
         /// <returns>The scaled quaternion.</returns>
-        public static TQuaternion Multiply(TQuaternion quaternion1, TFloat scaleFactor)
+        private static TQuaternion Multiply(TQuaternion quaternion1, TFloat scaleFactor)
         {
             Multiply(ref quaternion1, scaleFactor, out TQuaternion result);
             return result;
@@ -370,7 +285,7 @@ namespace TrueSync
         /// <param name="quaternion1">The quaternion to scale.</param>
         /// <param name="scaleFactor">Scale factor.</param>
         /// <param name="result">The scaled quaternion.</param>
-        public static void Multiply(ref TQuaternion quaternion1, TFloat scaleFactor, out TQuaternion result)
+        private static void Multiply(ref TQuaternion quaternion1, TFloat scaleFactor, out TQuaternion result)
         {
             result.x = quaternion1.x * scaleFactor;
             result.y = quaternion1.y * scaleFactor;
@@ -378,24 +293,6 @@ namespace TrueSync
             result.w = quaternion1.w * scaleFactor;
         }
 
-        /// <summary>
-        /// Sets the length of the quaternion to one.
-        /// </summary>
-        public void Normalize()
-        {
-            TFloat num2 = (x * x) + (y * y) + (z * z) + (w * w);
-            TFloat num = 1 / (TFloat.Sqrt(num2));
-            x *= num;
-            y *= num;
-            z *= num;
-            w *= num;
-        }
-
-        /// <summary>
-        /// Creates a quaternion from a matrix.
-        /// </summary>
-        /// <param name="matrix">A matrix representing an orientation.</param>
-        /// <returns>JQuaternion representing an orientation.</returns>
         public static TQuaternion CreateFromMatrix(TMatrix matrix)
         {
             CreateFromMatrix(ref matrix, out TQuaternion result);
@@ -448,16 +345,10 @@ namespace TrueSync
             }
         }
 
-        /// <summary>
-        /// Multiply two quaternions.
-        /// </summary>
-        /// <param name="value1">The first quaternion.</param>
-        /// <param name="value2">The second quaternion.</param>
-        /// <returns>The product of both quaternions.</returns>
-        public static TQuaternion operator *(TQuaternion value1, TQuaternion value2)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static TQuaternion operator *(TQuaternion lhs, TQuaternion rhs)
         {
-            Multiply(ref value1, ref value2, out TQuaternion result);
-            return result;
+            return new TQuaternion(lhs.w * rhs.x + lhs.x * rhs.w + lhs.y * rhs.z - lhs.z * rhs.y, lhs.w * rhs.y + lhs.y * rhs.w + lhs.z * rhs.x - lhs.x * rhs.z, lhs.w * rhs.z + lhs.z * rhs.w + lhs.x * rhs.y - lhs.y * rhs.x, lhs.w * rhs.w - lhs.x * rhs.x - lhs.y * rhs.y - lhs.z * rhs.z);
         }
 
         /// <summary>
@@ -472,26 +363,11 @@ namespace TrueSync
             return result;
         }
 
-        /// <summary>
-        /// Subtract two quaternions.
-        /// </summary>
-        /// <param name="value1">The first quaternion.</param>
-        /// <param name="value2">The second quaternion.</param>
-        /// <returns>The difference of both quaternions.</returns>
-        public static TQuaternion operator -(TQuaternion value1, TQuaternion value2)
-        {
-            Subtract(ref value1, ref value2, out TQuaternion result);
-            return result;
-        }
-
-        /**
-         *  @brief Rotates a {@link TSVector} by the {@link TSQuanternion}.
-         **/
         public static TVector3 operator *(TQuaternion quat, TVector3 vec)
         {
-            TFloat num = quat.x * 2f;
-            TFloat num2 = quat.y * 2f;
-            TFloat num3 = quat.z * 2f;
+            TFloat num = quat.x * 2;
+            TFloat num2 = quat.y * 2;
+            TFloat num3 = quat.z * 2;
             TFloat num4 = quat.x * num;
             TFloat num5 = quat.y * num2;
             TFloat num6 = quat.z * num3;
@@ -510,9 +386,76 @@ namespace TrueSync
             return result;
         }
 
-        public override string ToString()
+        public void SetFromToRotation(TVector3 fromDirection, TVector3 toDirection)
+        {
+            TQuaternion targetRotation = FromToRotation(fromDirection, toDirection);
+            Set(targetRotation.x, targetRotation.y, targetRotation.z, targetRotation.w);
+        }
+
+        public static TQuaternion RotateTowards(TQuaternion from, TQuaternion to, TFloat maxDegreesDelta)
+        {
+            TFloat dot = Dot(from, to);
+
+            if (dot < TFloat.Zero)
+            {
+                to = Multiply(to, -TFloat.One);
+                dot = -dot;
+            }
+
+            TFloat halfTheta = TFloat.Acos(dot);
+            TFloat theta = halfTheta * 2;
+
+            maxDegreesDelta *= TFloat.Deg2Rad;
+
+            if (maxDegreesDelta >= theta)
+            {
+                return to;
+            }
+
+            maxDegreesDelta /= theta;
+
+            return Multiply(Multiply(from, TFloat.Sin((TFloat.One - maxDegreesDelta) * halfTheta)) + Multiply(to, TFloat.Sin(maxDegreesDelta * halfTheta)), 1 / TFloat.Sin(halfTheta));
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static TQuaternion Normalize(TQuaternion q)
+        {
+            TFloat num = TMath.Sqrt(Dot(q, q));
+            if (num < TMath.Epsilon)
+            {
+                return identity;
+            }
+
+            return new TQuaternion(q.x / num, q.y / num, q.z / num, q.w / num);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Normalize()
+        {
+            this = Normalize(this);
+        }
+
+        public readonly override int GetHashCode()
+        {
+            return x.GetHashCode() ^ (y.GetHashCode() << 2) ^ (z.GetHashCode() >> 2) ^ (w.GetHashCode() >> 1);
+        }
+
+        public override readonly string ToString()
         {
             return string.Format("({0:f1}, {1:f1}, {2:f1}, {3:f1})", x.AsFloat(), y.AsFloat(), z.AsFloat(), w.AsFloat());
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override readonly bool Equals(object other)
+        {
+            if (other is not TQuaternion)
+            {
+                return false;
+            }
+
+            return Equals((TQuaternion)other);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly bool Equals(TQuaternion other)
+        {
+            return x.Equals(other.x) && y.Equals(other.y) && z.Equals(other.z) && w.Equals(other.w);
         }
 
     }

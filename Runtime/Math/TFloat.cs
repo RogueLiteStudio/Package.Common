@@ -947,27 +947,27 @@ namespace TrueSync
             return (decimal)value._serializedValue / ONE;
         }
 
-        public float AsFloat()
+        public readonly float AsFloat()
         {
             return (float)this;
         }
 
-        public int AsInt()
+        public readonly int AsInt()
         {
             return (int)this;
         }
 
-        public long AsLong()
+        public readonly long AsLong()
         {
             return (long)this;
         }
 
-        public double AsDouble()
+        public readonly double AsDouble()
         {
             return (double)this;
         }
 
-        public decimal AsDecimal()
+        public readonly decimal AsDecimal()
         {
             return (decimal)this;
         }
@@ -1007,26 +1007,26 @@ namespace TrueSync
             return _serializedValue.GetHashCode();
         }
 
-        public bool Equals(TFloat other)
+        public readonly bool Equals(TFloat other)
         {
             return _serializedValue == other._serializedValue;
         }
 
-        public int CompareTo(TFloat other)
+        public readonly int CompareTo(TFloat other)
         {
             return _serializedValue.CompareTo(other._serializedValue);
         }
 
-        public override string ToString()
+        public readonly override string ToString()
         {
             return ((float)this).ToString();
         }
 
-        public string ToString(IFormatProvider provider)
+        public readonly string ToString(IFormatProvider provider)
         {
             return ((float)this).ToString(provider);
         }
-        public string ToString(string format)
+        public readonly string ToString(string format)
         {
             return ((float)this).ToString(format);
         }

@@ -64,12 +64,10 @@ namespace TrueSync
         /// </summary>
         /// <param name="number">The number to get the square root from.</param>
         /// <returns></returns>
-        #region public static FP Sqrt(FP number)
         public static TFloat Sqrt(TFloat number)
         {
             return TFloat.Sqrt(number);
         }
-        #endregion
 
         /// <summary>
         /// Gets the maximum number of two values.
@@ -77,12 +75,10 @@ namespace TrueSync
         /// <param name="val1">The first value.</param>
         /// <param name="val2">The second value.</param>
         /// <returns>Returns the largest value.</returns>
-        #region public static FP Max(FP val1, FP val2)
         public static TFloat Max(TFloat val1, TFloat val2)
         {
             return (val1 > val2) ? val1 : val2;
         }
-        #endregion
 
         /// <summary>
         /// Gets the minimum number of two values.
@@ -90,12 +86,15 @@ namespace TrueSync
         /// <param name="val1">The first value.</param>
         /// <param name="val2">The second value.</param>
         /// <returns>Returns the smallest value.</returns>
-        #region public static FP Min(FP val1, FP val2)
         public static TFloat Min(TFloat val1, TFloat val2)
         {
             return (val1 < val2) ? val1 : val2;
         }
-        #endregion
+
+        public static int Minx(int val1, int val2)
+        {
+            return (val1 < val2) ? val1 : val2;
+        }
 
         /// <summary>
         /// Gets the maximum number of three values.
@@ -104,13 +103,16 @@ namespace TrueSync
         /// <param name="val2">The second value.</param>
         /// <param name="val3">The third value.</param>
         /// <returns>Returns the largest value.</returns>
-        #region public static FP Max(FP val1, FP val2,FP val3)
         public static TFloat Max(TFloat val1, TFloat val2, TFloat val3)
         {
             TFloat max12 = (val1 > val2) ? val1 : val2;
             return (max12 > val3) ? max12 : val3;
         }
-        #endregion
+
+        public static int Max(int val1, int val2)
+        {
+            return (val1 > val2) ? val1 : val2;
+        }
 
         /// <summary>
         /// Returns a number which is within [min,max]
@@ -119,7 +121,6 @@ namespace TrueSync
         /// <param name="min">The minimum value.</param>
         /// <param name="max">The maximum value.</param>
         /// <returns>The clamped value.</returns>
-        #region public static FP Clamp(FP value, FP min, FP max)
         public static TFloat Clamp(TFloat value, TFloat min, TFloat max)
         {
             if (value < min)
@@ -133,7 +134,6 @@ namespace TrueSync
             }
             return value;
         }
-        #endregion
 
         /// <summary>
         /// Returns a number which is within [FP.Zero, FP.One]
@@ -156,7 +156,6 @@ namespace TrueSync
         /// </summary>
         /// <param name="matrix">The matrix.</param>
         /// <param name="result">The absolute matrix.</param>
-        #region public static void Absolute(ref JMatrix matrix,out JMatrix result)
         public static void Absolute(ref TMatrix matrix, out TMatrix result)
         {
             result.M11 = TFloat.Abs(matrix.M11);
@@ -169,7 +168,6 @@ namespace TrueSync
             result.M32 = TFloat.Abs(matrix.M32);
             result.M33 = TFloat.Abs(matrix.M33);
         }
-        #endregion
 
         /// <summary>
         /// Returns the sine of value.
@@ -555,6 +553,33 @@ namespace TrueSync
                 currentVelocity = (num8 - num5) / deltaTime;
             }
             return num8;
+        }
+
+        public static int NextPowerOfTwo(int value)
+        {
+            value--;
+            value |= value >> 16;
+            value |= value >> 8;
+            value |= value >> 4;
+            value |= value >> 2;
+            value |= value >> 1;
+            return value + 1;
+        }
+        public static int ClosestPowerOfTwo(int value)
+        {
+            int num = NextPowerOfTwo(value);
+            int num2 = num >> 1;
+            if (value - num2 < num - value)
+            {
+                return num2;
+            }
+
+            return num;
+        }
+
+        public static bool IsPowerOfTwo(int value)
+        {
+            return (value & (value - 1)) == 0;
         }
     }
 }

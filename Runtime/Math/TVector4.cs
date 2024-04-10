@@ -18,6 +18,7 @@
 */
 
 using System;
+using System.Runtime.CompilerServices;
 
 namespace TrueSync
 {
@@ -39,33 +40,84 @@ namespace TrueSync
         public TFloat z;
         /// <summary>The W component of the vector.</summary>
         public TFloat w;
+        private static readonly TVector4 zeroVector = new TVector4(TFloat.Zero, TFloat.Zero, TFloat.Zero, TFloat.Zero);
 
-        /// <summary>
-        /// A vector with components (0,0,0,0);
-        /// </summary>
-        public static readonly TVector4 zero;
-        /// <summary>
-        /// A vector with components (1,1,1,1);
-        /// </summary>
-        public static readonly TVector4 one;
-        /// <summary>
-        /// A vector with components 
-        /// (FP.MinValue,FP.MinValue,FP.MinValue);
-        /// </summary>
-        public static readonly TVector4 MinValue;
-        /// <summary>
-        /// A vector with components 
-        /// (FP.MaxValue,FP.MaxValue,FP.MaxValue);
-        /// </summary>
-        public static readonly TVector4 MaxValue;
+        private static readonly TVector4 oneVector = new TVector4(TFloat.One, TFloat.One, TFloat.One, TFloat.One);
 
-        static TVector4()
+        private static readonly TVector4 positiveInfinityVector = new TVector4(TFloat.PositiveInfinity, TFloat.PositiveInfinity, TFloat.PositiveInfinity, TFloat.PositiveInfinity);
+
+        private static readonly TVector4 negativeInfinityVector = new TVector4(TFloat.NegativeInfinity, TFloat.NegativeInfinity, TFloat.NegativeInfinity, TFloat.NegativeInfinity);
+
+        public TFloat this[int index]
         {
-            one = new TVector4(1, 1, 1, 1);
-            zero = new TVector4(0, 0, 0, 0);
-            MinValue = new TVector4(TFloat.MinValue);
-            MaxValue = new TVector4(TFloat.MaxValue);
-            InternalZero = zero;
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get
+            {
+                return index switch
+                {
+                    0 => x,
+                    1 => y,
+                    2 => z,
+                    3 => w,
+                    _ => throw new IndexOutOfRangeException("Invalid Vector4 index!"),
+                };
+            }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set
+            {
+                switch (index)
+                {
+                    case 0:
+                        x = value;
+                        break;
+                    case 1:
+                        y = value;
+                        break;
+                    case 2:
+                        z = value;
+                        break;
+                    case 3:
+                        w = value;
+                        break;
+                    default:
+                        throw new IndexOutOfRangeException("Invalid Vector4 index!");
+                }
+            }
+        }
+        public static TVector4 zero
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get
+            {
+                return zeroVector;
+            }
+        }
+
+        public static TVector4 one
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get
+            {
+                return oneVector;
+            }
+        }
+
+        public static TVector4 positiveInfinity
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get
+            {
+                return positiveInfinityVector;
+            }
+        }
+
+        public static TVector4 negativeInfinity
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get
+            {
+                return negativeInfinityVector;
+            }
         }
 
         public static TVector4 Abs(TVector4 other)
@@ -81,14 +133,10 @@ namespace TrueSync
         {
             get
             {
-                return (((this.x * this.x) + (this.y * this.y)) + (this.z * this.z) + (this.w * this.w));
+                return (x * x) + (y * y) + (z * z) + (w * w);
             }
         }
 
-        /// <summary>
-        /// Gets the length of the vector.
-        /// </summary>
-        /// <returns>Returns the length of the vector.</returns>
         public TFloat magnitude
         {
             get
@@ -103,10 +151,6 @@ namespace TrueSync
             return Normalize(vector) * maxLength;
         }
 
-        /// <summary>
-        /// Gets a normalized version of the vector.
-        /// </summary>
-        /// <returns>Returns a normalized version of the vector.</returns>
         public TVector4 normalized
         {
             get
@@ -118,13 +162,6 @@ namespace TrueSync
             }
         }
 
-        /// <summary>
-        /// Constructor initializing a new instance of the structure
-        /// </summary>
-        /// <param name="x">The X component of the vector.</param>
-        /// <param name="y">The Y component of the vector.</param>
-        /// <param name="z">The Z component of the vector.</param>
-        /// <param name="w">The W component of the vector.</param>
         public TVector4(int x, int y, int z, int w)
         {
             this.x = (TFloat)x;
@@ -141,9 +178,6 @@ namespace TrueSync
             this.w = w;
         }
 
-        /// <summary>
-        /// Multiplies each component of the vector by the same components of the provided vector.
-        /// </summary>
         public void Scale(TVector4 other)
         {
             x *= other.x;
@@ -152,13 +186,6 @@ namespace TrueSync
             w *= other.w;
         }
 
-        /// <summary>
-        /// Sets all vector component to specific values.
-        /// </summary>
-        /// <param name="x">The X component of the vector.</param>
-        /// <param name="y">The Y component of the vector.</param>
-        /// <param name="z">The Z component of the vector.</param>
-        /// <param name="w">The W component of the vector.</param>
         public void Set(TFloat x, TFloat y, TFloat z, TFloat w)
         {
             this.x = x;
@@ -167,10 +194,6 @@ namespace TrueSync
             this.w = w;
         }
 
-        /// <summary>
-        /// Constructor initializing a new instance of the structure
-        /// </summary>
-        /// <param name="xyz">All components of the vector are set to xyz</param>
         public TVector4(TFloat xyzw)
         {
             x = xyzw;
@@ -183,12 +206,13 @@ namespace TrueSync
         {
             return from + (to - from) * percent;
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static TVector4 Project(TVector4 a, TVector4 b)
+        {
+            return b * (Dot(a, b) / Dot(b, b));
+        }
 
-        /// <summary>
-        /// Builds a string from the JVector.
-        /// </summary>
-        /// <returns>A string containing all three components.</returns>
-        public override string ToString()
+        public override readonly string ToString()
         {
             return string.Format("({0:f1}, {1:f1}, {2:f1}, {3:f1})", x.AsFloat(), y.AsFloat(), z.AsFloat(), w.AsFloat());
         }
@@ -198,7 +222,7 @@ namespace TrueSync
         /// </summary>
         /// <param name="obj">The object to test.</param>
         /// <returns>Returns true if they are euqal, otherwise false.</returns>
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object obj)
         {
             if (!(obj is TVector4)) return false;
             TVector4 other = (TVector4)obj;
@@ -681,15 +705,6 @@ namespace TrueSync
             return result;
         }
 
-        public TVector2 ToTSVector2()
-        {
-            return new TVector2(x, y);
-        }
-
-        public TVector3 ToTSVector()
-        {
-            return new TVector3(x, y, z);
-        }
     }
 
 }

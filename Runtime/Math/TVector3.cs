@@ -18,6 +18,7 @@
 */
 
 using System;
+using System.Runtime.CompilerServices;
 
 namespace TrueSync
 {
@@ -38,64 +39,162 @@ namespace TrueSync
         public TFloat y;
         /// <summary>The Z component of the vector.</summary>
         public TFloat z;
+        private static readonly TVector3 zeroVector = new TVector3(TFloat.Zero, TFloat.Zero, TFloat.Zero);
+
+        private static readonly TVector3 oneVector = new TVector3(TFloat.One, TFloat.One, TFloat.One);
+
+        private static readonly TVector3 upVector = new TVector3(TFloat.Zero, TFloat.One, TFloat.Zero);
+
+        private static readonly TVector3 downVector = new TVector3(TFloat.Zero, -TFloat.One, TFloat.Zero);
+
+        private static readonly TVector3 leftVector = new TVector3(-TFloat.One, TFloat.Zero, TFloat.Zero);
+
+        private static readonly TVector3 rightVector = new TVector3(TFloat.One, TFloat.Zero, TFloat.Zero);
+
+        private static readonly TVector3 forwardVector = new TVector3(TFloat.Zero, TFloat.Zero, TFloat.One);
+
+        private static readonly TVector3 backVector = new TVector3(TFloat.Zero, TFloat.Zero, -TFloat.One);
+
+        private static readonly TVector3 positiveInfinityVector = new TVector3(TFloat.PositiveInfinity, TFloat.PositiveInfinity, TFloat.PositiveInfinity);
+
+        private static readonly TVector3 negativeInfinityVector = new TVector3(TFloat.NegativeInfinity, TFloat.NegativeInfinity, TFloat.NegativeInfinity);
+
+        public TFloat this[int index]
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get
+            {
+                return index switch
+                {
+                    0 => x,
+                    1 => y,
+                    2 => z,
+                    _ => throw new IndexOutOfRangeException("Invalid Vector3 index!"),
+                };
+            }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set
+            {
+                switch (index)
+                {
+                    case 0:
+                        x = value;
+                        break;
+                    case 1:
+                        y = value;
+                        break;
+                    case 2:
+                        z = value;
+                        break;
+                    default:
+                        throw new IndexOutOfRangeException("Invalid Vector3 index!");
+                }
+            }
+        }
 
         /// <summary>
         /// A vector with components (0,0,0);
         /// </summary>
-        public static readonly TVector3 zero;
+        public static TVector3 zero
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get
+            {
+                return zeroVector;
+            }
+        }
         /// <summary>
         /// A vector with components (-1,0,0);
         /// </summary>
-        public static readonly TVector3 left;
+        public static TVector3 left
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get
+            {
+                return leftVector;
+            }
+        }
         /// <summary>
         /// A vector with components (1,0,0);
         /// </summary>
-        public static readonly TVector3 right;
+        public static TVector3 right
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get
+            {
+                return rightVector;
+            }
+        }
         /// <summary>
         /// A vector with components (0,1,0);
         /// </summary>
-        public static readonly TVector3 up;
+        public static TVector3 up
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get
+            {
+                return upVector;
+            }
+        }
         /// <summary>
         /// A vector with components (0,-1,0);
         /// </summary>
-        public static readonly TVector3 down;
+        public static TVector3 down
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get
+            {
+                return downVector;
+            }
+        }
         /// <summary>
         /// A vector with components (0,0,-1);
         /// </summary>
-        public static readonly TVector3 back;
+        public static TVector3 back
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get
+            {
+                return backVector;
+            }
+        }
         /// <summary>
         /// A vector with components (0,0,1);
         /// </summary>
-        public static readonly TVector3 forward;
+        public static TVector3 forward
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get
+            {
+                return forwardVector;
+            }
+        }
         /// <summary>
         /// A vector with components (1,1,1);
         /// </summary>
-        public static readonly TVector3 one;
-        /// <summary>
-        /// A vector with components 
-        /// (FP.MinValue,FP.MinValue,FP.MinValue);
-        /// </summary>
-        public static readonly TVector3 MinValue;
-        /// <summary>
-        /// A vector with components 
-        /// (FP.MaxValue,FP.MaxValue,FP.MaxValue);
-        /// </summary>
-        public static readonly TVector3 MaxValue;
-
-        static TVector3()
+        public static TVector3 one
         {
-            one = new TVector3(1, 1, 1);
-            zero = new TVector3(0, 0, 0);
-            left = new TVector3(-1, 0, 0);
-            right = new TVector3(1, 0, 0);
-            up = new TVector3(0, 1, 0);
-            down = new TVector3(0, -1, 0);
-            back = new TVector3(0, 0, -1);
-            forward = new TVector3(0, 0, 1);
-            MinValue = new TVector3(TFloat.MinValue);
-            MaxValue = new TVector3(TFloat.MaxValue);
-            Arbitrary = new TVector3(1, 1, 1);
-            InternalZero = zero;
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get
+            {
+                return oneVector;
+            }
+        }
+        public static TVector3 positiveInfinity
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get
+            {
+                return positiveInfinityVector;
+            }
+        }
+        public static TVector3 negativeInfinity
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get
+            {
+                return negativeInfinityVector;
+            }
         }
 
         public static TVector3 Abs(TVector3 other)
@@ -128,15 +227,6 @@ namespace TrueSync
             }
         }
 
-        public static TVector3 ClampMagnitude(TVector3 vector, TFloat maxLength)
-        {
-            return Normalize(vector) * maxLength;
-        }
-
-        /// <summary>
-        /// Gets a normalized version of the vector.
-        /// </summary>
-        /// <returns>Returns a normalized version of the vector.</returns>
         public TVector3 normalized
         {
             get
@@ -147,13 +237,6 @@ namespace TrueSync
                 return result;
             }
         }
-
-        /// <summary>
-        /// Constructor initializing a new instance of the structure
-        /// </summary>
-        /// <param name="x">The X component of the vector.</param>
-        /// <param name="y">The Y component of the vector.</param>
-        /// <param name="z">The Z component of the vector.</param>
 
         public TVector3(int x, int y, int z)
         {
@@ -168,23 +251,17 @@ namespace TrueSync
             this.y = y;
             this.z = z;
         }
-
-        /// <summary>
-        /// Multiplies each component of the vector by the same components of the provided vector.
-        /// </summary>
-        public void Scale(TVector3 other)
+        
+        public static TVector3 Slerp(TVector3 from, TVector3 to, TFloat t)
         {
-            x *= other.x;
-            y *= other.y;
-            z *= other.z;
+            TFloat dot = Dot(from, to);
+            TMath.Clamp(dot, -1.0f, 1.0f);
+            TFloat theta = TMath.Acos(dot) * t;
+            TVector3 RelativeVec = to - from * dot;
+            RelativeVec.Normalize();
+            return ((from * TMath.Cos(theta)) + (RelativeVec * TMath.Sin(theta)));
         }
 
-        /// <summary>
-        /// Sets all vector component to specific values.
-        /// </summary>
-        /// <param name="x">The X component of the vector.</param>
-        /// <param name="y">The Y component of the vector.</param>
-        /// <param name="z">The Z component of the vector.</param>
         public void Set(TFloat x, TFloat y, TFloat z)
         {
             this.x = x;
@@ -192,47 +269,98 @@ namespace TrueSync
             this.z = z;
         }
 
-        /// <summary>
-        /// Constructor initializing a new instance of the structure
-        /// </summary>
-        /// <param name="xyz">All components of the vector are set to xyz</param>
         public TVector3(TFloat xyz)
         {
             x = xyz;
             y = xyz;
             z = xyz;
         }
-
-        public static TVector3 Lerp(TVector3 from, TVector3 to, TFloat percent)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static TVector3 Lerp(TVector3 a, TVector3 b, TFloat t)
         {
-            return from + (to - from) * percent;
+            t = TMath.Clamp(t, TFloat.Zero, TFloat.One);
+            return new TVector3(a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t, a.z + (b.z - a.z) * t);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static TVector3 LerpUnclamped(TVector3 a, TVector3 b, TFloat t)
+        {
+            return new TVector3(a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t, a.z + (b.z - a.z) * t);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static TVector3 MoveTowards(TVector3 current, TVector3 target, TFloat maxDistanceDelta)
+        {
+            TFloat num = target.x - current.x;
+            TFloat num2 = target.y - current.y;
+            TFloat num3 = target.z - current.z;
+            TFloat num4 = num * num + num2 * num2 + num3 * num3;
+            if (num4 == TFloat.Zero || (maxDistanceDelta >= TFloat.Zero && num4 <= maxDistanceDelta * maxDistanceDelta))
+            {
+                return target;
+            }
+
+            TFloat num5 = TMath.Sqrt(num4);
+            return new TVector3(current.x + num / num5 * maxDistanceDelta, current.y + num2 / num5 * maxDistanceDelta, current.z + num3 / num5 * maxDistanceDelta);
         }
 
-        /// <summary>
-        /// Builds a string from the JVector.
-        /// </summary>
-        /// <returns>A string containing all three components.</returns>
-        public override string ToString()
+        public static TVector3 SmoothDamp(TVector3 current, TVector3 target, ref TVector3 currentVelocity, TFloat smoothTime, TFloat maxSpeed, TFloat deltaTime)
         {
-            return string.Format("({0:f1}, {1:f1}, {2:f1})", x.AsFloat(), y.AsFloat(), z.AsFloat());
-        }
+            smoothTime = TMath.Max(TFloat.EN4, smoothTime);
+            TFloat num4 = 2f / smoothTime;
+            TFloat num5 = num4 * deltaTime;
+            TFloat num6 = 1f / (1f + num5 + 0.48f * num5 * num5 + 0.235f * num5 * num5 * num5);
+            TFloat num7 = current.x - target.x;
+            TFloat num8 = current.y - target.y;
+            TFloat num9 = current.z - target.z;
+            TVector3 vector = target;
+            TFloat num10 = maxSpeed * smoothTime;
+            TFloat num11 = num10 * num10;
+            TFloat num12 = num7 * num7 + num8 * num8 + num9 * num9;
+            if (num12 > num11)
+            {
+                TFloat num13 = TMath.Sqrt(num12);
+                num7 = num7 / num13 * num10;
+                num8 = num8 / num13 * num10;
+                num9 = num9 / num13 * num10;
+            }
 
-        /// <summary>
-        /// Tests if an object is equal to this vector.
-        /// </summary>
-        /// <param name="obj">The object to test.</param>
-        /// <returns>Returns true if they are euqal, otherwise false.</returns>
-        public override readonly bool Equals(object obj)
+            target.x = current.x - num7;
+            target.y = current.y - num8;
+            target.z = current.z - num9;
+            TFloat num14 = (currentVelocity.x + num4 * num7) * deltaTime;
+            TFloat num15 = (currentVelocity.y + num4 * num8) * deltaTime;
+            TFloat num16 = (currentVelocity.z + num4 * num9) * deltaTime;
+            currentVelocity.x = (currentVelocity.x - num4 * num14) * num6;
+            currentVelocity.y = (currentVelocity.y - num4 * num15) * num6;
+            currentVelocity.z = (currentVelocity.z - num4 * num16) * num6;
+            TFloat num = target.x + (num7 + num14) * num6;
+            TFloat num2 = target.y + (num8 + num15) * num6;
+            TFloat num3 = target.z + (num9 + num16) * num6;
+            TFloat num17 = vector.x - current.x;
+            TFloat num18 = vector.y - current.y;
+            TFloat num19 = vector.z - current.z;
+            TFloat num20 = num - vector.x;
+            TFloat num21 = num2 - vector.y;
+            TFloat num22 = num3 - vector.z;
+            if (num17 * num20 + num18 * num21 + num19 * num22 > 0f)
+            {
+                num = vector.x;
+                num2 = vector.y;
+                num3 = vector.z;
+                currentVelocity.x = (num - vector.x) / deltaTime;
+                currentVelocity.y = (num2 - vector.y) / deltaTime;
+                currentVelocity.z = (num3 - vector.z) / deltaTime;
+            }
+
+            return new TVector3(num, num2, num3);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Scale(TVector3 other)
         {
-            if (obj is not TVector3) return false;
-            TVector3 other = (TVector3)obj;
-
-            return (((x == other.x) && (y == other.y)) && (z == other.z));
+            x *= other.x;
+            y *= other.y;
+            z *= other.z;
         }
-
-        /// <summary>
-        /// Multiplies each component of the vector by the same components of the provided vector.
-        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static TVector3 Scale(TVector3 vecA, TVector3 vecB)
         {
             TVector3 result;
@@ -243,88 +371,150 @@ namespace TrueSync
             return result;
         }
 
-        /// <summary>
-        /// Tests if two JVector are equal.
-        /// </summary>
-        /// <param name="value1">The first value.</param>
-        /// <param name="value2">The second value.</param>
-        /// <returns>Returns true if both values are equal, otherwise false.</returns>
-        public static bool operator ==(TVector3 value1, TVector3 value2)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static TVector3 Cross(TVector3 lhs, TVector3 rhs)
         {
-            return (((value1.x == value2.x) && (value1.y == value2.y)) && (value1.z == value2.z));
+            return new TVector3(lhs.y * rhs.z - lhs.z * rhs.y, lhs.z * rhs.x - lhs.x * rhs.z, lhs.x * rhs.y - lhs.y * rhs.x);
+        }
+        public readonly override string ToString()
+        {
+            return string.Format("({0:f1}, {1:f1}, {2:f1})", x.AsFloat(), y.AsFloat(), z.AsFloat());
         }
 
-        /// <summary>
-        /// Tests if two JVector are not equal.
-        /// </summary>
-        /// <param name="value1">The first value.</param>
-        /// <param name="value2">The second value.</param>
-        /// <returns>Returns false if both values are equal, otherwise true.</returns>
-        public static bool operator !=(TVector3 value1, TVector3 value2)
+        public override readonly bool Equals(object obj)
         {
-            if ((value1.x == value2.x) && (value1.y == value2.y))
+            if (obj is not TVector3) return false;
+            TVector3 other = (TVector3)obj;
+
+            return (((x == other.x) && (y == other.y)) && (z == other.z));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static TVector3 Reflect(TVector3 inDirection, TVector3 inNormal)
+        {
+            TFloat num = -(TFloat)2 * Dot(inNormal, inDirection);
+            return new TVector3(num * inNormal.x + inDirection.x, num * inNormal.y + inDirection.y, num * inNormal.z + inDirection.z);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static TVector3 Normalize(TVector3 value)
+        {
+            TFloat num = Magnitude(value);
+            if (num > TFloat.EN5)
             {
-                return (value1.z != value2.z);
+                return value / num;
             }
-            return true;
+
+            return zero;
         }
-
-        /// <summary>
-        /// Gets a vector with the minimum x,y and z values of both vectors.
-        /// </summary>
-        /// <param name="value1">The first value.</param>
-        /// <param name="value2">The second value.</param>
-        /// <returns>A vector with the minimum x,y and z values of both vectors.</returns>
-
-        public static TVector3 Min(TVector3 value1, TVector3 value2)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Normalize()
         {
-            Min(ref value1, ref value2, out var result);
-            return result;
+            TFloat num = Magnitude(this);
+            if (num > TFloat.EN5)
+            {
+                this /= num;
+            }
+            else
+            {
+                this = zero;
+            }
         }
-
-        /// <summary>
-        /// Gets a vector with the minimum x,y and z values of both vectors.
-        /// </summary>
-        /// <param name="value1">The first value.</param>
-        /// <param name="value2">The second value.</param>
-        /// <param name="result">A vector with the minimum x,y and z values of both vectors.</param>
-        public static void Min(ref TVector3 value1, ref TVector3 value2, out TVector3 result)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static TFloat Dot(TVector3 lhs, TVector3 rhs)
         {
-            result.x = (value1.x < value2.x) ? value1.x : value2.x;
-            result.y = (value1.y < value2.y) ? value1.y : value2.y;
-            result.z = (value1.z < value2.z) ? value1.z : value2.z;
+            return lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z;
         }
-
-        /// <summary>
-        /// Gets a vector with the maximum x,y and z values of both vectors.
-        /// </summary>
-        /// <param name="value1">The first value.</param>
-        /// <param name="value2">The second value.</param>
-        /// <returns>A vector with the maximum x,y and z values of both vectors.</returns>
-        public static TVector3 Max(TVector3 value1, TVector3 value2)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static TVector3 Project(TVector3 vector, TVector3 onNormal)
         {
-            Max(ref value1, ref value2, out var result);
-            return result;
-        }
+            TFloat num = Dot(onNormal, onNormal);
+            if (num < TMath.Epsilon)
+            {
+                return zero;
+            }
 
-        public static TFloat Distance(TVector3 v1, TVector3 v2)
+            TFloat num2 = Dot(vector, onNormal);
+            return new TVector3(onNormal.x * num2 / num, onNormal.y * num2 / num, onNormal.z * num2 / num);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static TVector3 ProjectOnPlane(TVector3 vector, TVector3 planeNormal)
         {
-            return TFloat.Sqrt((v1.x - v2.x) * (v1.x - v2.x) + (v1.y - v2.y) * (v1.y - v2.y) + (v1.z - v2.z) * (v1.z - v2.z));
-        }
+            TFloat num = Dot(planeNormal, planeNormal);
+            if (num < TMath.Epsilon)
+            {
+                return vector;
+            }
 
-        /// <summary>
-        /// Gets a vector with the maximum x,y and z values of both vectors.
-        /// </summary>
-        /// <param name="value1">The first value.</param>
-        /// <param name="value2">The second value.</param>
-        /// <param name="result">A vector with the maximum x,y and z values of both vectors.</param>
-        public static void Max(ref TVector3 value1, ref TVector3 value2, out TVector3 result)
+            TFloat num2 = Dot(vector, planeNormal);
+            return new TVector3(vector.x - planeNormal.x * num2 / num, vector.y - planeNormal.y * num2 / num, vector.z - planeNormal.z * num2 / num);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static TFloat Angle(TVector3 from, TVector3 to)
         {
-            result.x = (value1.x > value2.x) ? value1.x : value2.x;
-            result.y = (value1.y > value2.y) ? value1.y : value2.y;
-            result.z = (value1.z > value2.z) ? value1.z : value2.z;
+            TFloat num = TMath.Sqrt(from.sqrMagnitude * to.sqrMagnitude);
+            if (num < TFloat.EN5)
+            {
+                return 0f;
+            }
+
+            TFloat num2 = TMath.Clamp(Dot(from, to) / num, -1f, 1f);
+            return TMath.Acos(num2) * 57.29578f;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static TFloat SignedAngle(TVector3 from, TVector3 to, TVector3 axis)
+        {
+            TFloat num = Angle(from, to);
+            TFloat num2 = from.y * to.z - from.z * to.y;
+            TFloat num3 = from.z * to.x - from.x * to.z;
+            TFloat num4 = from.x * to.y - from.y * to.x;
+            TFloat num5 = TMath.Sign(axis.x * num2 + axis.y * num3 + axis.z * num4);
+            return num * num5;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static TFloat Distance(TVector3 a, TVector3 b)
+        {
+            TFloat num = a.x - b.x;
+            TFloat num2 = a.y - b.y;
+            TFloat num3 = a.z - b.z;
+            return TMath.Sqrt(num * num + num2 * num2 + num3 * num3);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static TVector3 ClampMagnitude(TVector3 vector, TFloat maxLength)
+        {
+            TFloat num = vector.sqrMagnitude;
+            if (num > maxLength * maxLength)
+            {
+                TFloat num2 = TMath.Sqrt(num);
+                TFloat num3 = vector.x / num2;
+                TFloat num4 = vector.y / num2;
+                TFloat num5 = vector.z / num2;
+                return new TVector3(num3 * maxLength, num4 * maxLength, num5 * maxLength);
+            }
+
+            return vector;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static TFloat Magnitude(TVector3 vector)
+        {
+            return TMath.Sqrt(vector.x * vector.x + vector.y * vector.y + vector.z * vector.z);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static TFloat SqrMagnitude(TVector3 vector)
+        {
+            return vector.x * vector.x + vector.y * vector.y + vector.z * vector.z;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static TVector3 Min(TVector3 lhs, TVector3 rhs)
+        {
+            return new TVector3(TMath.Min(lhs.x, rhs.x), TMath.Min(lhs.y, rhs.y), TMath.Min(lhs.z, rhs.z));
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static TVector3 Max(TVector3 lhs, TVector3 rhs)
+        {
+            return new TVector3(TMath.Max(lhs.x, rhs.x), TMath.Max(lhs.y, rhs.y), TMath.Max(lhs.z, rhs.z));
+        }
         /// <summary>
         /// Sets the length of the vector to zero.
         /// </summary>
@@ -354,224 +544,10 @@ namespace TrueSync
         }
 
         /// <summary>
-        /// Transforms a vector by the given matrix.
-        /// </summary>
-        /// <param name="position">The vector to transform.</param>
-        /// <param name="matrix">The transform matrix.</param>
-        /// <returns>The transformed vector.</returns>
-        public static TVector3 Transform(TVector3 position, TMatrix matrix)
-        {
-            Transform(ref position, ref matrix, out var result);
-            return result;
-        }
-
-        /// <summary>
-        /// Transforms a vector by the given matrix.
-        /// </summary>
-        /// <param name="position">The vector to transform.</param>
-        /// <param name="matrix">The transform matrix.</param>
-        /// <param name="result">The transformed vector.</param>
-        public static void Transform(ref TVector3 position, ref TMatrix matrix, out TVector3 result)
-        {
-            TFloat num0 = ((position.x * matrix.M11) + (position.y * matrix.M21)) + (position.z * matrix.M31);
-            TFloat num1 = ((position.x * matrix.M12) + (position.y * matrix.M22)) + (position.z * matrix.M32);
-            TFloat num2 = ((position.x * matrix.M13) + (position.y * matrix.M23)) + (position.z * matrix.M33);
-
-            result.x = num0;
-            result.y = num1;
-            result.z = num2;
-        }
-
-        /// <summary>
-        /// Transforms a vector by the transposed of the given Matrix.
-        /// </summary>
-        /// <param name="position">The vector to transform.</param>
-        /// <param name="matrix">The transform matrix.</param>
-        /// <param name="result">The transformed vector.</param>
-        public static void TransposedTransform(ref TVector3 position, ref TMatrix matrix, out TVector3 result)
-        {
-            TFloat num0 = ((position.x * matrix.M11) + (position.y * matrix.M12)) + (position.z * matrix.M13);
-            TFloat num1 = ((position.x * matrix.M21) + (position.y * matrix.M22)) + (position.z * matrix.M23);
-            TFloat num2 = ((position.x * matrix.M31) + (position.y * matrix.M32)) + (position.z * matrix.M33);
-
-            result.x = num0;
-            result.y = num1;
-            result.z = num2;
-        }
-
-        /// <summary>
-        /// Calculates the dot product of two vectors.
-        /// </summary>
-        /// <param name="vector1">The first vector.</param>
-        /// <param name="vector2">The second vector.</param>
-        /// <returns>Returns the dot product of both vectors.</returns>
-        public static TFloat Dot(TVector3 vector1, TVector3 vector2)
-        {
-            return Dot(ref vector1, ref vector2);
-        }
-
-
-        /// <summary>
-        /// Calculates the dot product of both vectors.
-        /// </summary>
-        /// <param name="vector1">The first vector.</param>
-        /// <param name="vector2">The second vector.</param>
-        /// <returns>Returns the dot product of both vectors.</returns>
-        public static TFloat Dot(ref TVector3 vector1, ref TVector3 vector2)
-        {
-            return (vector1.x * vector2.x) + (vector1.y * vector2.y) + (vector1.z * vector2.z);
-        }
-
-        // Projects a vector onto another vector.
-        public static TVector3 Project(TVector3 vector, TVector3 onNormal)
-        {
-            TFloat sqrtMag = Dot(onNormal, onNormal);
-            if (sqrtMag < TMath.Epsilon)
-                return zero;
-            else
-                return onNormal * Dot(vector, onNormal) / sqrtMag;
-        }
-
-        // Projects a vector onto a plane defined by a normal orthogonal to the plane.
-        public static TVector3 ProjectOnPlane(TVector3 vector, TVector3 planeNormal)
-        {
-            return vector - Project(vector, planeNormal);
-        }
-
-
-        // Returns the angle in degrees between /from/ and /to/. This is always the smallest
-        public static TFloat Angle(TVector3 from, TVector3 to)
-        {
-            return TMath.Acos(TMath.Clamp(Dot(from.normalized, to.normalized), -TFloat.ONE, TFloat.ONE)) * TMath.Rad2Deg;
-        }
-
-        // The smaller of the two possible angles between the two vectors is returned, therefore the result will never be greater than 180 degrees or smaller than -180 degrees.
-        // If you imagine the from and to vectors as lines on a piece of paper, both originating from the same point, then the /axis/ vector would point up out of the paper.
-        // The measured angle between the two vectors would be positive in a clockwise direction and negative in an anti-clockwise direction.
-        public static TFloat SignedAngle(TVector3 from, TVector3 to, TVector3 axis)
-        {
-            TVector3 fromNorm = from.normalized, toNorm = to.normalized;
-            TFloat unsignedAngle = TMath.Acos(TMath.Clamp(Dot(fromNorm, toNorm), -TFloat.ONE, TFloat.ONE)) * TMath.Rad2Deg;
-            TFloat sign = TMath.Sign(Dot(axis, Cross(fromNorm, toNorm)));
-            return unsignedAngle * sign;
-        }
-
-        /// <summary>
-        /// Adds two vectors.
-        /// </summary>
-        /// <param name="value1">The first vector.</param>
-        /// <param name="value2">The second vector.</param>
-        /// <returns>The sum of both vectors.</returns>
-        public static TVector3 Add(TVector3 value1, TVector3 value2)
-        {
-            Add(ref value1, ref value2, out TVector3 result);
-            return result;
-        }
-
-        /// <summary>
-        /// Adds to vectors.
-        /// </summary>
-        /// <param name="value1">The first vector.</param>
-        /// <param name="value2">The second vector.</param>
-        /// <param name="result">The sum of both vectors.</param>
-        public static void Add(ref TVector3 value1, ref TVector3 value2, out TVector3 result)
-        {
-            TFloat num0 = value1.x + value2.x;
-            TFloat num1 = value1.y + value2.y;
-            TFloat num2 = value1.z + value2.z;
-
-            result.x = num0;
-            result.y = num1;
-            result.z = num2;
-        }
-
-        /// <summary>
-        /// Divides a vector by a factor.
-        /// </summary>
-        /// <param name="value1">The vector to divide.</param>
-        /// <param name="scaleFactor">The scale factor.</param>
-        /// <returns>Returns the scaled vector.</returns>
-        public static TVector3 Divide(TVector3 value1, TFloat scaleFactor)
-        {
-            Divide(ref value1, scaleFactor, out TVector3 result);
-            return result;
-        }
-
-        /// <summary>
-        /// Divides a vector by a factor.
-        /// </summary>
-        /// <param name="value1">The vector to divide.</param>
-        /// <param name="scaleFactor">The scale factor.</param>
-        /// <param name="result">Returns the scaled vector.</param>
-        public static void Divide(ref TVector3 value1, TFloat scaleFactor, out TVector3 result)
-        {
-            result.x = value1.x / scaleFactor;
-            result.y = value1.y / scaleFactor;
-            result.z = value1.z / scaleFactor;
-        }
-
-        /// <summary>
-        /// Subtracts two vectors.
-        /// </summary>
-        /// <param name="value1">The first vector.</param>
-        /// <param name="value2">The second vector.</param>
-        /// <returns>The difference of both vectors.</returns>
-        public static TVector3 Subtract(TVector3 value1, TVector3 value2)
-        {
-            Subtract(ref value1, ref value2, out var result);
-            return result;
-        }
-
-        /// <summary>
-        /// Subtracts to vectors.
-        /// </summary>
-        /// <param name="value1">The first vector.</param>
-        /// <param name="value2">The second vector.</param>
-        /// <param name="result">The difference of both vectors.</param>
-        public static void Subtract(ref TVector3 value1, ref TVector3 value2, out TVector3 result)
-        {
-            TFloat num0 = value1.x - value2.x;
-            TFloat num1 = value1.y - value2.y;
-            TFloat num2 = value1.z - value2.z;
-
-            result.x = num0;
-            result.y = num1;
-            result.z = num2;
-        }
-
-        /// <summary>
-        /// The cross product of two vectors.
-        /// </summary>
-        /// <param name="vector1">The first vector.</param>
-        /// <param name="vector2">The second vector.</param>
-        /// <returns>The cross product of both vectors.</returns>
-        public static TVector3 Cross(TVector3 vector1, TVector3 vector2)
-        {
-            Cross(ref vector1, ref vector2, out var result);
-            return result;
-        }
-
-        /// <summary>
-        /// The cross product of two vectors.
-        /// </summary>
-        /// <param name="vector1">The first vector.</param>
-        /// <param name="vector2">The second vector.</param>
-        /// <param name="result">The cross product of both vectors.</param>
-        public static void Cross(ref TVector3 vector1, ref TVector3 vector2, out TVector3 result)
-        {
-            TFloat num3 = (vector1.y * vector2.z) - (vector1.z * vector2.y);
-            TFloat num2 = (vector1.z * vector2.x) - (vector1.x * vector2.z);
-            TFloat num = (vector1.x * vector2.y) - (vector1.y * vector2.x);
-            result.x = num3;
-            result.y = num2;
-            result.z = num;
-        }
-
-        /// <summary>
         /// Gets the hashcode of the vector.
         /// </summary>
         /// <returns>Returns the hashcode of the vector.</returns>
-        public override int GetHashCode()
+        public readonly override int GetHashCode()
         {
             return x.GetHashCode() ^ y.GetHashCode() ^ z.GetHashCode();
         }
@@ -586,208 +562,54 @@ namespace TrueSync
             z = -z;
         }
 
-        /// <summary>
-        /// Inverses the direction of a vector.
-        /// </summary>
-        /// <param name="value">The vector to inverse.</param>
-        /// <returns>The negated vector.</returns>
-        public static TVector3 Negate(TVector3 value)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static TVector3 operator +(TVector3 a, TVector3 b)
         {
-            Negate(ref value, out TVector3 result);
-            return result;
+            return new TVector3(a.x + b.x, a.y + b.y, a.z + b.z);
         }
 
-        /// <summary>
-        /// Inverses the direction of a vector.
-        /// </summary>
-        /// <param name="value">The vector to inverse.</param>
-        /// <param name="result">The negated vector.</param>
-        public static void Negate(ref TVector3 value, out TVector3 result)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static TVector3 operator -(TVector3 a, TVector3 b)
         {
-            TFloat num0 = -value.x;
-            TFloat num1 = -value.y;
-            TFloat num2 = -value.z;
-
-            result.x = num0;
-            result.y = num1;
-            result.z = num2;
+            return new TVector3(a.x - b.x, a.y - b.y, a.z - b.z);
         }
 
-        /// <summary>
-        /// Normalizes the given vector.
-        /// </summary>
-        /// <param name="value">The vector which should be normalized.</param>
-        /// <returns>A normalized vector.</returns>
-        public static TVector3 Normalize(TVector3 value)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static TVector3 operator -(TVector3 a)
         {
-            Normalize(ref value, out TVector3 result);
-            return result;
+            return new TVector3(- a.x, - a.y, - a.z);
         }
 
-        /// <summary>
-        /// Normalizes this vector.
-        /// </summary>
-        public void Normalize()
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static TVector3 operator *(TVector3 a, TFloat d)
         {
-            TFloat num2 = (x * x) + (y * y) + (z * z);
-            TFloat num = TFloat.One / TFloat.Sqrt(num2);
-            x *= num;
-            y *= num;
-            z *= num;
+            return new TVector3(a.x * d, a.y * d, a.z * d);
         }
 
-        /// <summary>
-        /// Normalizes the given vector.
-        /// </summary>
-        /// <param name="value">The vector which should be normalized.</param>
-        /// <param name="result">A normalized vector.</param>
-        public static void Normalize(ref TVector3 value, out TVector3 result)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static TVector3 operator *(TFloat d, TVector3 a)
         {
-            TFloat num2 = ((value.x * value.x) + (value.y * value.y)) + (value.z * value.z);
-            TFloat num = TFloat.One / TFloat.Sqrt(num2);
-            result.x = value.x * num;
-            result.y = value.y * num;
-            result.z = value.z * num;
+            return new TVector3(a.x * d, a.y * d, a.z * d);
         }
 
-        /// <summary>
-        /// Swaps the components of both vectors.
-        /// </summary>
-        /// <param name="vector1">The first vector to swap with the second.</param>
-        /// <param name="vector2">The second vector to swap with the first.</param>
-        public static void Swap(ref TVector3 vector1, ref TVector3 vector2)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static TVector3 operator /(TVector3 a, TFloat d)
         {
-            TFloat temp;
-
-            temp = vector1.x;
-            vector1.x = vector2.x;
-            vector2.x = temp;
-
-            temp = vector1.y;
-            vector1.y = vector2.y;
-            vector2.y = temp;
-
-            temp = vector1.z;
-            vector1.z = vector2.z;
-            vector2.z = temp;
+            return new TVector3(a.x / d, a.y / d, a.z / d);
         }
 
-        /// <summary>
-        /// Multiply a vector with a factor.
-        /// </summary>
-        /// <param name="value1">The vector to multiply.</param>
-        /// <param name="scaleFactor">The scale factor.</param>
-        /// <returns>Returns the multiplied vector.</returns>
-        public static TVector3 Multiply(TVector3 value1, TFloat scaleFactor)
+        public static bool operator ==(TVector3 value1, TVector3 value2)
         {
-            Multiply(ref value1, scaleFactor, out TVector3 result);
-            return result;
+            return (((value1.x == value2.x) && (value1.y == value2.y)) && (value1.z == value2.z));
         }
 
-        /// <summary>
-        /// Multiply a vector with a factor.
-        /// </summary>
-        /// <param name="value1">The vector to multiply.</param>
-        /// <param name="scaleFactor">The scale factor.</param>
-        /// <param name="result">Returns the multiplied vector.</param>
-        public static void Multiply(ref TVector3 value1, TFloat scaleFactor, out TVector3 result)
+        public static bool operator !=(TVector3 value1, TVector3 value2)
         {
-            result.x = value1.x * scaleFactor;
-            result.y = value1.y * scaleFactor;
-            result.z = value1.z * scaleFactor;
-        }
-
-        /// <summary>
-        /// Calculates the cross product of two vectors.
-        /// </summary>
-        /// <param name="value1">The first vector.</param>
-        /// <param name="value2">The second vector.</param>
-        /// <returns>Returns the cross product of both.</returns>
-        public static TVector3 operator %(TVector3 value1, TVector3 value2)
-        {
-            Cross(ref value1, ref value2, out var result);
-            return result;
-        }
-
-        /// <summary>
-        /// Calculates the dot product of two vectors.
-        /// </summary>
-        /// <param name="value1">The first vector.</param>
-        /// <param name="value2">The second vector.</param>
-        /// <returns>Returns the dot product of both.</returns>
-        public static TFloat operator *(TVector3 value1, TVector3 value2)
-        {
-            return Dot(ref value1, ref value2);
-        }
-
-        /// <summary>
-        /// Multiplies a vector by a scale factor.
-        /// </summary>
-        /// <param name="value1">The vector to scale.</param>
-        /// <param name="value2">The scale factor.</param>
-        /// <returns>Returns the scaled vector.</returns>
-        public static TVector3 operator *(TVector3 value1, TFloat value2)
-        {
-            Multiply(ref value1, value2, out TVector3 result);
-            return result;
-        }
-
-        /// <summary>
-        /// Multiplies a vector by a scale factor.
-        /// </summary>
-        /// <param name="value2">The vector to scale.</param>
-        /// <param name="value1">The scale factor.</param>
-        /// <returns>Returns the scaled vector.</returns>
-        public static TVector3 operator *(TFloat value1, TVector3 value2)
-        {
-            Multiply(ref value2, value1, out TVector3 result);
-            return result;
-        }
-
-        /// <summary>
-        /// Subtracts two vectors.
-        /// </summary>
-        /// <param name="value1">The first vector.</param>
-        /// <param name="value2">The second vector.</param>
-        /// <returns>The difference of both vectors.</returns>
-        public static TVector3 operator -(TVector3 value1, TVector3 value2)
-        {
-            Subtract(ref value1, ref value2, out var result);
-            return result;
-        }
-
-        /// <summary>
-        /// Adds two vectors.
-        /// </summary>
-        /// <param name="value1">The first vector.</param>
-        /// <param name="value2">The second vector.</param>
-        /// <returns>The sum of both vectors.</returns>
-        public static TVector3 operator +(TVector3 value1, TVector3 value2)
-        {
-            Add(ref value1, ref value2, out var result);
-            return result;
-        }
-
-        /// <summary>
-        /// Divides a vector by a factor.
-        /// </summary>
-        /// <param name="value1">The vector to divide.</param>
-        /// <param name="scaleFactor">The scale factor.</param>
-        /// <returns>Returns the scaled vector.</returns>
-        public static TVector3 operator /(TVector3 value1, TFloat value2)
-        {
-            Divide(ref value1, value2, out TVector3 result);
-            return result;
-        }
-
-        public TVector2 ToTSVector2()
-        {
-            return new TVector2(x, y);
-        }
-
-        public TVector4 ToTSVector4()
-        {
-            return new TVector4(x, y, z, TFloat.One);
+            if ((value1.x == value2.x) && (value1.y == value2.y))
+            {
+                return (value1.z != value2.z);
+            }
+            return true;
         }
 
     }

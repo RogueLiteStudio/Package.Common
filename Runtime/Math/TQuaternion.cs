@@ -196,7 +196,7 @@ namespace TrueSync
             return rotation;
         }
 
-        private static void CreateFromYawPitchRoll(TFloat yaw, TFloat pitch, TFloat roll, out TQuaternion result)
+        public static void CreateFromYawPitchRoll(TFloat yaw, TFloat pitch, TFloat roll, out TQuaternion result)
         {
             TFloat num9 = roll * TFloat.Half;
             TFloat num6 = TFloat.Sin(num9);

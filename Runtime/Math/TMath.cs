@@ -1,4 +1,5 @@
 ﻿using System;
+using Unity.VisualScripting.YamlDotNet.Core.Tokens;
 /* Copyright (C) <2009-2011> <Thorben Linneweber, Jitter Physics>
 * 
 *  This software is provided 'as-is', without any express or implied
@@ -135,6 +136,20 @@ namespace TrueSync
             return value;
         }
 
+        public static int Clamp(int value, int min, int max)
+        {
+            if (value < min)
+            {
+                value = min;
+                return value;
+            }
+            if (value > max)
+            {
+                value = max;
+            }
+            return value;
+        }
+
         /// <summary>
         /// Returns a number which is within [FP.Zero, FP.One]
         /// </summary>
@@ -233,12 +248,22 @@ namespace TrueSync
             return TFloat.Floor(value);
         }
 
+        public static int FloorToInt(TFloat value)
+        {
+            return (int)TFloat.Floor(value);
+        }
+
         /// <summary>
         /// Returns the smallest integral value that is greater than or equal to the specified number.
         /// </summary>
         public static TFloat Ceiling(TFloat value)
+        { 
+            return TFloat.Ceiling(value);
+        }
+
+        public static int CeilingToInt(TFloat value)
         {
-            return value;
+            return (int)TFloat.Ceiling(value);
         }
 
         /// <summary>
@@ -248,6 +273,11 @@ namespace TrueSync
         public static TFloat Round(TFloat value)
         {
             return TFloat.Round(value);
+        }
+
+        public static int RoundToInt(TFloat value)
+        {
+            return (int)TFloat.Round(value);
         }
 
         /// <summary>

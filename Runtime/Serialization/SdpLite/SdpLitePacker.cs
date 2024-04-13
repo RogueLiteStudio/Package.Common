@@ -33,7 +33,7 @@ public class SdpLitePacker
 
     public static void Pack(SdpLite.Packer packer, uint tag, bool require, float value)
     {
-        if (value != 0)
+        if (value != 0 || require)
             packer.Pack(tag, value);
     }
 

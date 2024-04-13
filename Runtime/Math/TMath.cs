@@ -92,9 +92,9 @@ namespace TrueSync
             return (val1 < val2) ? val1 : val2;
         }
 
-        public static int Minx(int val1, int val2)
+        public static int Min(int a, int b)
         {
-            return (val1 < val2) ? val1 : val2;
+            return (a < b) ? a : b;
         }
 
         /// <summary>
@@ -256,12 +256,12 @@ namespace TrueSync
         /// <summary>
         /// Returns the smallest integral value that is greater than or equal to the specified number.
         /// </summary>
-        public static TFloat Ceiling(TFloat value)
+        public static TFloat Ceil(TFloat value)
         { 
             return TFloat.Ceiling(value);
         }
 
-        public static int CeilingToInt(TFloat value)
+        public static int CeilToInt(TFloat value)
         {
             return (int)TFloat.Ceiling(value);
         }

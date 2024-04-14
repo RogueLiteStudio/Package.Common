@@ -22,10 +22,10 @@ namespace CodeGen
             {typeof(double), "double" },
             {typeof(string), "string" },
         };
-        public static string TypeToName(Type type)
+        public static string TypeToName(Type type, string nameSpace = null)
         {
             if (BuiltInType.TryGetValue(type, out string name))
-                return name;
+                return FixedByNameSpace(name, nameSpace);
             if (type.IsGenericType)
             {
                 var paramTypes = type.GenericTypeArguments;
@@ -42,7 +42,20 @@ namespace CodeGen
                 sb.Append('>');
                 return sb.ToString();
             }
-            return type.FullName;
+            return FixedByNameSpace(type.FullName, nameSpace);
+        }
+
+        public static string FixedByNameSpace(string typeName, string nameSpace)
+        {
+            if (!string.IsNullOrEmpty(nameSpace))
+            {
+                if (typeName.Length > nameSpace.Length && typeName.StartsWith(typeName))
+                {
+                    if (typeName[nameSpace.Length] == '.')
+                        return typeName.Substring(nameSpace.Length + 1);
+                }
+            }
+            return typeName;
         }
 
         public static string ToTypeName<T>()

@@ -1,6 +1,6 @@
 ﻿using TrueSync;
 
-public class TrueSyncPack : SdpLitePacker
+public class TrueSyncSdpPack : SdpLitePacker
 {
     public static void Pack(SdpLite.Packer packer, uint tag, bool require, TFloat value)
     {

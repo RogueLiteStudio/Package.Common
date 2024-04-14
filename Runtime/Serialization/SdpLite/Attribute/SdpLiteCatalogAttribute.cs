@@ -21,4 +21,6 @@ public abstract class SdpLiteCatalogAttribute : Attribute
     public abstract string GenerateRooPath { get; }//生成代码的根目录
     public abstract string NameSpace { get; }//生成的代码的命名空间
     public virtual SdpLitePackType PackType=>SdpLitePackType.Normal;//生成的代码类型
+    public virtual Type PackBaseType => null;
+    public virtual Type UnpackBaseType => null;
 }

@@ -31,6 +31,8 @@ public class SdpLiteStruct
     public SdpLiteStruct BaseClass;
     public List<SdpLiteFieldInfo> Fields = new List<SdpLiteFieldInfo>();
     public bool IsBuiltIn;
+    public bool IsBasePack;
+    public bool IsBaseUnPack;
     public bool GenSerializeFunction;
     public Type PolymorphismBase;
     public bool NeedDynamicUnPack;//需要生成多态Unpack接口

@@ -1,3 +1,4 @@
+using CodeGen;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,8 @@ public class SdpLiteStructCatalog
     private readonly Dictionary<Type, SdpLiteStruct> sdpStructs = new Dictionary<Type, SdpLiteStruct>();
     private readonly List<SdpLitePolymorphismGroup> polymorphism = new List<SdpLitePolymorphismGroup>();
     public IReadOnlyDictionary<Type, SdpLiteStruct> Structs => sdpStructs;
+    private readonly HashSet<Type> packInBaseClass = new HashSet<Type>();
+    private readonly HashSet<Type> unpackInBaseClass = new HashSet<Type>();
 
     public Type CatalogType { get; private set; }
     public SdpLiteStructCatalog ParentCatalog { get; private set; }
@@ -22,6 +25,8 @@ public class SdpLiteStructCatalog
     public string NameSpace { get; private set; }
     public SdpLitePackType PackType { get; private set; }
     public string ClassName { get; private set; }
+    public string PackBaseClassName { get; private set; }
+    public string UnPackBaseClassName { get; private set; }
 
 
     public SdpLiteStructCatalog(Type catalogType)
@@ -32,6 +37,24 @@ public class SdpLiteStructCatalog
         NameSpace = instance.NameSpace;
         PackType = instance.PackType;
         ClassName = catalogType.Name.Replace("Attribute", "");
+        if (instance.PackBaseType != null)
+        {
+            PackBaseClassName = GeneratorUtils.TypeToName(instance.PackBaseType);
+            AnalyseBasePackClass(instance.PackBaseType);
+        }
+        else
+        {
+            PackBaseClassName = "SdpLitePacker";
+        }
+        if (instance.UnpackBaseType != null)
+        {
+            UnPackBaseClassName = GeneratorUtils.TypeToName(instance.UnpackBaseType);
+            AnalyseBaseUnPackClass(instance.UnpackBaseType);
+        }
+        else
+        {
+            UnPackBaseClassName = "SdpLiteUnPacker";
+        }
     }
 
     public void SetParent(SdpLiteStructCatalog parent)
@@ -47,6 +70,8 @@ public class SdpLiteStructCatalog
         if (sdpStructs.TryGetValue(type, out var sdpStruct))
             return sdpStruct;
         sdpStruct = SdpLiteGeneratorUtils.ToStruct(type);
+        sdpStruct.IsBasePack = packInBaseClass.Contains(type);
+        sdpStruct.IsBaseUnPack = unpackInBaseClass.Contains(type);
         sdpStructs.Add(type, sdpStruct);
         var baseType = type.BaseType;
         var currentStruct = sdpStruct;
@@ -65,6 +90,46 @@ public class SdpLiteStructCatalog
         }
         PolymorphismCheck(sdpStruct);
         return sdpStruct;
+    }
+
+    private void AnalyseBasePackClass(Type basePack)
+    {
+        var methods = basePack.GetMethods();
+        foreach (var m in methods)
+        {
+            if (m.IsGenericMethodDefinition)
+                continue;
+            var paramInfos = m.GetParameters();
+            if (paramInfos.Length != 4)
+                continue;
+            if (m.Name != "Pack")
+                continue;
+            packInBaseClass.Add(paramInfos[3].ParameterType);
+        }
+        if (basePack.BaseType != typeof(object))
+        {
+            AnalyseBasePackClass(basePack.BaseType);
+        }
+    }
+
+    private void AnalyseBaseUnPackClass(Type baseUnPack)
+    {
+        var methods = baseUnPack.GetMethods();
+        foreach (var m in methods)
+        {
+            if (m.IsGenericMethodDefinition)
+                continue;
+            var paramInfos = m.GetParameters();
+            if (paramInfos.Length != 3)
+                continue;
+            if (m.Name != "UnPack")
+                continue;
+            unpackInBaseClass.Add(paramInfos[2].ParameterType.GetElementType());
+        }
+        if (baseUnPack.BaseType != typeof(object))
+        {
+            AnalyseBaseUnPackClass(baseUnPack.BaseType);
+        }
     }
 
     private void PolymorphismCheck(SdpLiteStruct sdpStruct)

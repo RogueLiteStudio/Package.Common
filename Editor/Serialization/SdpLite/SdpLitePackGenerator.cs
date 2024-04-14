@@ -27,18 +27,18 @@ public struct SdpLitePackGenerator : ISdpLiteCodeGenerator
         }
     }
 
-    public static void WritePack(CSharpCodeWriter writer, SdpLiteStruct sdpStruct, IEnumerable<SdpLiteStruct> structs)
+    public static void WritePack(CSharpCodeWriter writer, string nameSpace, SdpLiteStruct sdpStruct, IEnumerable<SdpLiteStruct> structs)
     {
-        string typeName = GeneratorUtils.TypeToName(sdpStruct.Type);
-        writer.WriteLine($"public static void Pack(mygame.SdpLite.Packer packer, uint tag, bool require, {typeName} value)");
+        string typeName = GeneratorUtils.TypeToName(sdpStruct.Type, nameSpace);
+        writer.WriteLine($"public static void Pack(SdpLite.Packer packer, uint tag, bool require, {typeName} value)");
         using (new CSharpCodeWriter.Scop(writer))
         {
             writer.WriteLine("var positoin0 = packer.Position;");
-            writer.WriteLine("packer.PackHeader(tag, mygame.SdpLite.DataType.StructBegin);");
+            writer.WriteLine("packer.PackHeader(tag, SdpLite.DataType.StructBegin);");
             writer.WriteLine("var prePositoin = packer.Position;");
             if (sdpStruct.BaseClass != null)
             {
-                writer.WriteLine($"Pack(packer, 0, false, ({GeneratorUtils.TypeToName(sdpStruct.BaseClass.Type)})value);");
+                writer.WriteLine($"Pack(packer, 0, false, ({GeneratorUtils.TypeToName(sdpStruct.BaseClass.Type, nameSpace)})value);");
             }
             if (sdpStruct.Type.IsClass)
             {
@@ -72,39 +72,39 @@ public struct SdpLitePackGenerator : ISdpLiteCodeGenerator
             writer.WriteLine("if(packer.Position == prePositoin && !require)");
             writer.WriteLine("    packer.Rewind(positoin0);");
             writer.WriteLine("else");
-            writer.WriteLine("    packer.PackHeader(tag, mygame.SdpLite.DataType.StructEnd);");
+            writer.WriteLine("    packer.PackHeader(tag, SdpLite.DataType.StructEnd);");
         }
     }
 
-    public static void WriteSerialize(CSharpCodeWriter writer, SdpLiteStruct sdpStruct)
+    public static void WriteSerialize(CSharpCodeWriter writer, string nameSpace, SdpLiteStruct sdpStruct)
     {
-        string typeName = GeneratorUtils.TypeToName(sdpStruct.Type);
+        string typeName = GeneratorUtils.TypeToName(sdpStruct.Type, nameSpace);
         writer.WriteLine($"public static void Serialize({typeName} data, System.IO.MemoryStream memory)");
         using (new CSharpCodeWriter.Scop(writer))
         {
-            writer.WriteLine("mygame.SdpLite.Packer packer = new mygame.SdpLite.Packer(memory);");
+            writer.WriteLine("SdpLite.Packer packer = new SdpLite.Packer(memory);");
             writer.WriteLine("Pack(packer, 0, true, data);");
         }
     }
 
-    public string GenerateCode(IEnumerable<SdpLiteStruct> structs, string nameSpace, string className)
+    public string GenerateCode(IEnumerable<SdpLiteStruct> structs, SdpLiteStructCatalog catalog)
     {
         CSharpCodeWriter writer = new CSharpCodeWriter();
         writer.WriteLine("//工具自动生成，切勿手动修改");
-        using (new CSharpCodeWriter.NameSpaceScop(writer, nameSpace))
+        using (new CSharpCodeWriter.NameSpaceScop(writer, catalog.NameSpace))
         {
-            writer.WriteLine($"public partial class {className}Pack : mygame.SdpLitePacker");
+            writer.WriteLine($"public partial class {catalog.ClassName}Pack : {catalog.PackBaseClassName}");
             using (new CSharpCodeWriter.Scop(writer))
             {
                 foreach (var val in structs)
                 {
-                    WritePack(writer, val, structs);
+                    WritePack(writer, catalog.NameSpace, val, structs);
                 }
                 foreach (var val in structs)
                 {
                     if (val.GenSerializeFunction)
                     {
-                        WriteSerialize(writer, val);
+                        WriteSerialize(writer, catalog.NameSpace, val);
                     }
                 }
             }

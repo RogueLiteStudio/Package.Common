@@ -4,14 +4,14 @@ using System.Linq;
 
 public struct SdpLiteUnPackGenerator : ISdpLiteCodeGenerator
 {
-    public static void WriteUnPack(CSharpCodeWriter writer, SdpLiteStruct sdpStruct, IEnumerable<SdpLiteStruct> structs)
+    public static void WriteUnPack(CSharpCodeWriter writer, string nameSpace, SdpLiteStruct sdpStruct, IEnumerable<SdpLiteStruct> structs)
     {
-        string typeName = GeneratorUtils.TypeToName(sdpStruct.Type);
-        writer.WriteLine($"public static void UnPack(mygame.SdpLite.Unpacker unpacker, mygame.SdpLite.DataType type, ref {typeName} value)");
+        string typeName = GeneratorUtils.TypeToName(sdpStruct.Type, nameSpace);
+        writer.WriteLine($"public static void UnPack(SdpLite.Unpacker unpacker, SdpLite.DataType type, ref {typeName} value)");
         using (new CSharpCodeWriter.Scop(writer))
         {
-            writer.WriteLine("if(type != mygame.SdpLite.DataType.StructBegin)");
-            writer.WriteLine("    mygame.SdpLite.Unpacker.ThrowIncompatibleType(type);");
+            writer.WriteLine("if(type != SdpLite.DataType.StructBegin)");
+            writer.WriteLine("    SdpLite.Unpacker.ThrowIncompatibleType(type);");
             if (sdpStruct.Type.IsClass && !sdpStruct.Type.IsAbstract)
             {
                 writer.WriteLine("if(value == null)");
@@ -30,7 +30,7 @@ public struct SdpLiteUnPackGenerator : ISdpLiteCodeGenerator
 
                 writer.WriteLine("var headerSize = unpacker.PeekHeader(out var header);");
                 writer.WriteLine($" unpacker.SkipBytes(headerSize);");
-                writer.WriteLine("if(header.type == mygame.SdpLite.DataType.StructEnd)");
+                writer.WriteLine("if(header.type == SdpLite.DataType.StructEnd)");
                 using (new CSharpCodeWriter.Scop(writer))
                 {
                     writer.WriteLine("break;");
@@ -42,8 +42,8 @@ public struct SdpLiteUnPackGenerator : ISdpLiteCodeGenerator
                     if (sdpStruct.BaseClass != null)
                     {
                         writer.WriteLine($"case 0:");
-                        writer.WriteLine($"    {GeneratorUtils.TypeToName(sdpStruct.BaseClass.Type)} baseClass = value;");
-                        writer.WriteLine($"    UnPack(unpacker, mygame.SdpLite.DataType.StructBegin, ref baseClass);");
+                        writer.WriteLine($"    {GeneratorUtils.TypeToName(sdpStruct.BaseClass.Type, nameSpace)} baseClass = value;");
+                        writer.WriteLine($"    UnPack(unpacker, SdpLite.DataType.StructBegin, ref baseClass);");
                         writer.WriteLine($"    break;");
                     }
                     foreach (var field in sdpStruct.Fields)
@@ -60,7 +60,7 @@ public struct SdpLiteUnPackGenerator : ISdpLiteCodeGenerator
                             case SdpLiteStructType.Enum:
                                 writer.WriteLine($"    int tmp_{field.Info.Name} = (int)value.{field.Info.Name};");
                                 writer.WriteLine($"    UnPack(unpacker, header.type, ref tmp_{field.Info.Name});");
-                                writer.WriteLine($"    value.{field.Info.Name} = ({GeneratorUtils.TypeToName(field.Info.FieldType)})tmp_{field.Info.Name};");
+                                writer.WriteLine($"    value.{field.Info.Name} = ({GeneratorUtils.TypeToName(field.Info.FieldType, nameSpace)})tmp_{field.Info.Name};");
                                 break;
                             case SdpLiteStructType.Integer:
                             case SdpLiteStructType.Float:
@@ -89,37 +89,37 @@ public struct SdpLiteUnPackGenerator : ISdpLiteCodeGenerator
         }
     }
 
-    public static void WriteDeSerialize(CSharpCodeWriter writer, SdpLiteStruct sdpStruct)
+    public static void WriteDeSerialize(CSharpCodeWriter writer, string nameSpace, SdpLiteStruct sdpStruct)
     {
-        string typeName = GeneratorUtils.TypeToName(sdpStruct.Type);
+        string typeName = GeneratorUtils.TypeToName(sdpStruct.Type, nameSpace);
         writer.WriteLine($"public static void DeSerialize({typeName} result, byte[] data)");
 
         using (new CSharpCodeWriter.Scop(writer))
         {
-            writer.WriteLine("mygame.SdpLite.Unpacker unpacker = new mygame.SdpLite.Unpacker(data);");
+            writer.WriteLine("SdpLite.Unpacker unpacker = new SdpLite.Unpacker(data);");
             writer.WriteLine("var header = unpacker.UnpackHeader();");
             writer.WriteLine("UnPack(unpacker, header.type, ref result);");
         }
     }
 
-    public string GenerateCode(IEnumerable<SdpLiteStruct> structs, string nameSpace, string className)
+    public string GenerateCode(IEnumerable<SdpLiteStruct> structs, SdpLiteStructCatalog catalog)
     {
         CSharpCodeWriter writer = new CSharpCodeWriter();
         writer.WriteLine("//工具自动生成，切勿手动修改");
-        using (new CSharpCodeWriter.NameSpaceScop(writer, nameSpace))
+        using (new CSharpCodeWriter.NameSpaceScop(writer, catalog.NameSpace))
         {
-            writer.WriteLine($"public partial class {className}UnPack : mygame.SdpLiteUnPacker");
+            writer.WriteLine($"public partial class {catalog.ClassName}UnPack : {catalog.UnPackBaseClassName}");
             using (new CSharpCodeWriter.Scop(writer))
             {
                 foreach (var val in structs)
                 {
-                    WriteUnPack(writer, val, structs);
+                    WriteUnPack(writer, catalog.NameSpace, val, structs);
                 }
                 foreach (var val in structs)
                 {
                     if (val.GenSerializeFunction)
                     {
-                        WriteDeSerialize(writer, val);
+                        WriteDeSerialize(writer, catalog.NameSpace, val);
                     }
                 }
             }

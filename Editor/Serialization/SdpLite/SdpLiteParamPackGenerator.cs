@@ -26,24 +26,24 @@ public struct SdpLiteParamPackGenerator : ISdpLiteCodeGenerator
                 break;
         }
     }
-    public string GenerateCode(IEnumerable<SdpLiteStruct> structs, string nameSpace, string className)
+    public string GenerateCode(IEnumerable<SdpLiteStruct> structs, SdpLiteStructCatalog catalog)
     {
         CSharpCodeWriter writer = new CSharpCodeWriter();
         writer.WriteLine("//工具自动生成，切勿手动修改");
-        using (new CSharpCodeWriter.NameSpaceScop(writer, nameSpace))
+        using (new CSharpCodeWriter.NameSpaceScop(writer, catalog.NameSpace))
         {
-            writer.WriteLine($"public partial class {className}Pack : mygame.SdpLitePacker");
+            writer.WriteLine($"public partial class {catalog.ClassName}Pack : {catalog.PackBaseClassName}");
             using (new CSharpCodeWriter.Scop(writer))
             {
                 foreach (var sdpStruct in structs)
                 {
                     if (sdpStruct.IsEmpty() || sdpStruct.IsBuiltIn)
                         continue;
-                    writer.WriteLine($"public static void {sdpStruct.Type.Name}(mygame.SdpLite.Packer packer, {SdpLiteGeneratorUtils.ToParamList(sdpStruct, true)})");
+                    writer.WriteLine($"public static void {sdpStruct.Type.Name}(SdpLite.Packer packer, {SdpLiteGeneratorUtils.ToParamList(sdpStruct, true)})");
                     using (new CSharpCodeWriter.Scop(writer))
                     {
                         writer.WriteLine("var positoin0 = packer.Position;");
-                        writer.WriteLine("packer.PackHeader(0, mygame.SdpLite.DataType.StructBegin);");
+                        writer.WriteLine("packer.PackHeader(0, SdpLite.DataType.StructBegin);");
                         writer.WriteLine("var prePositoin = packer.Position;");
                         if (sdpStruct.BaseClass != null && !sdpStruct.BaseClass.IsEmpty())
                         {
@@ -62,7 +62,7 @@ public struct SdpLiteParamPackGenerator : ISdpLiteCodeGenerator
                         writer.WriteLine("if(packer.Position == prePositoin)");
                         writer.WriteLine("    packer.Rewind(positoin0);");
                         writer.WriteLine("else");
-                        writer.WriteLine("    packer.PackHeader(0, mygame.SdpLite.DataType.StructEnd);");
+                        writer.WriteLine("    packer.PackHeader(0, SdpLite.DataType.StructEnd);");
                     }
                 }
             }

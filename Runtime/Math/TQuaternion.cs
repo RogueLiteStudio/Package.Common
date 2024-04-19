@@ -119,20 +119,16 @@ namespace TrueSync
             z = new_z;
             w = new_w;
         }
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static bool IsEqualUsingDot(TFloat dot)
+        {
+            return dot + TFloat.EN6 > TFloat.One;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static TFloat Angle(TQuaternion a, TQuaternion b)
         {
-            TQuaternion aInv = Inverse(a);
-            TQuaternion f = b * aInv;
-
-            TFloat angle = TFloat.Acos(f.w) * 2 * TFloat.Rad2Deg;
-
-            if (angle > 180)
-            {
-                angle = 360 - angle;
-            }
-
-            return angle;
+            TFloat num = TMath.Min(TMath.Abs(Dot(a, b)), TFloat.One);
+            return IsEqualUsingDot(num) ? 0f : (TMath.Acos(num) * 2 * TFloat.Rad2Deg);
         }
 
         public static TQuaternion LookRotation(TVector3 forward)

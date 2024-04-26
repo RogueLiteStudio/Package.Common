@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -34,6 +35,7 @@ namespace VisualElementExtern
     {
         private List<Radio> buttons = new List<Radio>();
         public System.Action<string> OnSelect;
+        public System.Action<GenericMenu, string> OnElementMenu;
 
         public void Select(string key, bool withNofity = false)
         {
@@ -72,11 +74,24 @@ namespace VisualElementExtern
             {
                 Radio button = new Radio();
                 button.clicked += () => Select(button.viewDataKey, true);
+                button.RegisterCallback<MouseDownEvent>(evt =>
+                {
+                    if (OnElementMenu != null)
+                    {
+                        if (evt.button == 1)
+                        {
+                            GenericMenu menu = new GenericMenu();
+                            OnElementMenu(menu, button.viewDataKey);
+                            menu.ShowAsContext();
+                        }
+                    }
+                });
                 Add(button);
                 buttons.Add(button);
                 return button;
             }
             return buttons[index];
         }
+
     }
 }

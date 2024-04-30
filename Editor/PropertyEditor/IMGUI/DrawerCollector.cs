@@ -77,7 +77,9 @@ namespace PropertyEditor
 
         public static IDrawer CreateDrawer(FieldInfo field)
         {
-            if (field.IsStatic || !field.IsPublic || field.GetCustomAttribute<UnityEngine.HideInInspector>() != null)
+            if (field.IsStatic || !field.IsPublic 
+                || field.GetCustomAttribute<UnityEngine.HideInInspector>() != null
+                || field.GetCustomAttribute<InspectorIgnoreAttribute>() != null)
                 return null;
             //自定义编辑类型放在最前，可以支持对List类型的重写
             var custom = field.GetCustomAttribute<PropertyCustomDrawerAttribute>();

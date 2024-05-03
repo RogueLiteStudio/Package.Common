@@ -8,5 +8,11 @@ namespace PropertyEditor
             Value = EditorGUILayout.FloatField(Value);
         }
     }
-
+    public class TFloatDrawer : ValueDrawer<TrueSync.TFloat>
+    {
+        protected override void DoDraw(object val, IPropertyEditorContext context)
+        {
+            Value = EditorGUILayout.FloatField((float)Value);
+        }
+    }
 }

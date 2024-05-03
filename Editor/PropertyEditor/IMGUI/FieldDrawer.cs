@@ -6,7 +6,7 @@ namespace PropertyEditor
     {
         public FieldInfo Info;
         public IDrawer Drawer;
-
+        public bool ExpendInParent;
         private readonly GUIContent Content;
         private readonly MethodInfo ValidMethod;
 
@@ -21,13 +21,14 @@ namespace PropertyEditor
             {
                 ValidMethod = info.DeclaringType.GetMethod(validFunc.Name); 
             }
+            ExpendInParent = info.GetCustomAttribute<ExpandInParentAttribute>() != null;
         }
 
         public bool Draw(object data, IPropertyEditorContext context)
         {
             if (Drawer == null || ValidMethod != null && !(bool)ValidMethod.Invoke(data, null))
                 return false;
-            if (Drawer.Draw(Content, Info.GetValue(data), context))
+            if (Drawer.Draw(ExpendInParent ? null : Content, Info.GetValue(data), context))
             {
                 context.OnPropertyModify();
                 Info.SetValue(data, Drawer.GetValue());

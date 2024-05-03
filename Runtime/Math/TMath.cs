@@ -343,7 +343,16 @@ namespace TrueSync
         {
             return value1 + (value2 - value1) * Clamp01(amount);
         }
+        public static TFloat LerpAngle(TFloat a, TFloat b, TFloat t)
+        {
+            TFloat num = Repeat(b - a, 360);
+            if (num > 180)
+            {
+                num -= 360;
+            }
 
+            return a + num * Clamp01(t);
+        }
         public static TFloat InverseLerp(TFloat value1, TFloat value2, TFloat amount)
         {
             if (value1 != value2)
@@ -356,8 +365,8 @@ namespace TrueSync
             // It is expected that 0 < amount < 1
             // If amount < 0, return value1
             // If amount > 1, return value2
-            TFloat result = Clamp(amount, 0f, 1f);
-            result = Hermite(value1, 0f, value2, 0f, result);
+            TFloat result = Clamp(amount, 0f, 1);
+            result = Hermite(value1, 0f, value2, 0, result);
             return result;
         }
 

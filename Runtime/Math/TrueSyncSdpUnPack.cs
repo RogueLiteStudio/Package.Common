@@ -3,7 +3,7 @@ public class TrueSyncSdpUnPack : SdpLiteUnPacker
 {
     public static void UnPack(SdpLite.Unpacker unpacker, SdpLite.DataType type, ref TFloat value)
     {
-        unpacker.Unpack(type, out value._serializedValue);
+        unpacker.Unpack(type, out value._rawVal);
     }
     public static void UnPack(SdpLite.Unpacker unpacker, SdpLite.DataType type, ref TQuaternion value)
     {

@@ -11,7 +11,7 @@ namespace TrueSync
     public partial struct TFloat : IEquatable<TFloat>, IComparable<TFloat>
     {
 
-        public long _serializedValue;
+        public long _rawVal;
 
         public const long MAX_VALUE = long.MaxValue;
         public const long MIN_VALUE = long.MinValue;
@@ -77,8 +77,8 @@ namespace TrueSync
         public static int Sign(TFloat value)
         {
             return
-                value._serializedValue < 0 ? -1 :
-                value._serializedValue > 0 ? 1 :
+                value._rawVal < 0 ? -1 :
+                value._rawVal > 0 ? 1 :
                 0;
         }
 
@@ -89,15 +89,15 @@ namespace TrueSync
         /// </summary>
         public static TFloat Abs(TFloat value)
         {
-            if (value._serializedValue == MIN_VALUE)
+            if (value._rawVal == MIN_VALUE)
             {
                 return MaxValue;
             }
 
             // branchless implementation, see http://www.strchr.com/optimized_abs_function
-            var mask = value._serializedValue >> 63;
+            var mask = value._rawVal >> 63;
             TFloat result;
-            result._serializedValue = (value._serializedValue + mask) ^ mask;
+            result._rawVal = (value._rawVal + mask) ^ mask;
             return result;
             //return new FP((value._serializedValue + mask) ^ mask);
         }
@@ -109,9 +109,9 @@ namespace TrueSync
         public static TFloat FastAbs(TFloat value)
         {
             // branchless implementation, see http://www.strchr.com/optimized_abs_function
-            var mask = value._serializedValue >> 63;
+            var mask = value._rawVal >> 63;
             TFloat result;
-            result._serializedValue = (value._serializedValue + mask) ^ mask;
+            result._rawVal = (value._rawVal + mask) ^ mask;
             return result;
             //return new FP((value._serializedValue + mask) ^ mask);
         }
@@ -124,7 +124,7 @@ namespace TrueSync
         {
             // Just zero out the fractional part
             TFloat result;
-            result._serializedValue = (long)((ulong)value._serializedValue & 0xFFFFFFFF00000000);
+            result._rawVal = (long)((ulong)value._rawVal & 0xFFFFFFFF00000000);
             return result;
             //return new FP((long)((ulong)value._serializedValue & 0xFFFFFFFF00000000));
         }
@@ -134,7 +134,7 @@ namespace TrueSync
         /// </summary>
         public static TFloat Ceiling(TFloat value)
         {
-            var hasFractionalPart = (value._serializedValue & 0x00000000FFFFFFFF) != 0;
+            var hasFractionalPart = (value._rawVal & 0x00000000FFFFFFFF) != 0;
             return hasFractionalPart ? Floor(value) + One : value;
         }
 
@@ -144,7 +144,7 @@ namespace TrueSync
         /// </summary>
         public static TFloat Round(TFloat value)
         {
-            var fractionalPart = value._serializedValue & 0x00000000FFFFFFFF;
+            var fractionalPart = value._rawVal & 0x00000000FFFFFFFF;
             var integralPart = Floor(value);
             if (fractionalPart < 0x80000000)
             {
@@ -156,7 +156,7 @@ namespace TrueSync
             }
             // if number is halfway between two values, round to the nearest even number
             // this is the method used by System.Math.Round().
-            return (integralPart._serializedValue & ONE) == 0
+            return (integralPart._rawVal & ONE) == 0
                        ? integralPart
                        : integralPart + One;
         }
@@ -168,7 +168,7 @@ namespace TrueSync
         public static TFloat operator +(TFloat x, TFloat y)
         {
             TFloat result;
-            result._serializedValue = x._serializedValue + y._serializedValue;
+            result._rawVal = x._rawVal + y._rawVal;
             return result;
             //return new FP(x._serializedValue + y._serializedValue);
         }
@@ -178,8 +178,8 @@ namespace TrueSync
         /// </summary>
         public static TFloat OverflowAdd(TFloat x, TFloat y)
         {
-            var xl = x._serializedValue;
-            var yl = y._serializedValue;
+            var xl = x._rawVal;
+            var yl = y._rawVal;
             var sum = xl + yl;
             // if signs of operands are equal and signs of sum and x are different
             if (((~(xl ^ yl) & (xl ^ sum)) & MIN_VALUE) != 0)
@@ -187,7 +187,7 @@ namespace TrueSync
                 sum = xl > 0 ? MAX_VALUE : MIN_VALUE;
             }
             TFloat result;
-            result._serializedValue = sum;
+            result._rawVal = sum;
             return result;
             //return new FP(sum);
         }
@@ -198,7 +198,7 @@ namespace TrueSync
         public static TFloat FastAdd(TFloat x, TFloat y)
         {
             TFloat result;
-            result._serializedValue = x._serializedValue + y._serializedValue;
+            result._rawVal = x._rawVal + y._rawVal;
             return result;
             //return new FP(x._serializedValue + y._serializedValue);
         }
@@ -210,7 +210,7 @@ namespace TrueSync
         public static TFloat operator -(TFloat x, TFloat y)
         {
             TFloat result;
-            result._serializedValue = x._serializedValue - y._serializedValue;
+            result._rawVal = x._rawVal - y._rawVal;
             return result;
             //return new FP(x._serializedValue - y._serializedValue);
         }
@@ -220,8 +220,8 @@ namespace TrueSync
         /// </summary>
         public static TFloat OverflowSub(TFloat x, TFloat y)
         {
-            var xl = x._serializedValue;
-            var yl = y._serializedValue;
+            var xl = x._rawVal;
+            var yl = y._rawVal;
             var diff = xl - yl;
             // if signs of operands are different and signs of sum and x are different
             if ((((xl ^ yl) & (xl ^ diff)) & MIN_VALUE) != 0)
@@ -229,7 +229,7 @@ namespace TrueSync
                 diff = xl < 0 ? MIN_VALUE : MAX_VALUE;
             }
             TFloat result;
-            result._serializedValue = diff;
+            result._rawVal = diff;
             return result;
             //return new FP(diff);
         }
@@ -239,7 +239,7 @@ namespace TrueSync
         /// </summary>
         public static TFloat FastSub(TFloat x, TFloat y)
         {
-            return new TFloat(x._serializedValue - y._serializedValue);
+            return new TFloat(x._rawVal - y._rawVal);
         }
 
         static long AddOverflowHelper(long x, long y, ref bool overflow)
@@ -252,8 +252,8 @@ namespace TrueSync
 
         public static TFloat operator *(TFloat x, TFloat y)
         {
-            var xl = x._serializedValue;
-            var yl = y._serializedValue;
+            var xl = x._rawVal;
+            var yl = y._rawVal;
 
             var xlo = (ulong)(xl & 0x00000000FFFFFFFF);
             var xhi = xl >> FRACTIONAL_PLACES;
@@ -272,7 +272,7 @@ namespace TrueSync
 
             var sum = (long)loResult + midResult1 + midResult2 + hiResult;
             TFloat result;// = default(FP);
-            result._serializedValue = sum;
+            result._rawVal = sum;
             return result;
         }
 
@@ -282,8 +282,8 @@ namespace TrueSync
         /// </summary>
         public static TFloat OverflowMul(TFloat x, TFloat y)
         {
-            var xl = x._serializedValue;
-            var yl = y._serializedValue;
+            var xl = x._rawVal;
+            var yl = y._rawVal;
 
             var xlo = (ulong)(xl & 0x00000000FFFFFFFF);
             var xhi = xl >> FRACTIONAL_PLACES;
@@ -354,7 +354,7 @@ namespace TrueSync
                 }
             }
             TFloat result;
-            result._serializedValue = sum;
+            result._rawVal = sum;
             return result;
             //return new FP(sum);
         }
@@ -365,8 +365,8 @@ namespace TrueSync
         /// </summary>
         public static TFloat FastMul(TFloat x, TFloat y)
         {
-            var xl = x._serializedValue;
-            var yl = y._serializedValue;
+            var xl = x._rawVal;
+            var yl = y._rawVal;
 
             var xlo = (ulong)(xl & 0x00000000FFFFFFFF);
             var xhi = xl >> FRACTIONAL_PLACES;
@@ -385,7 +385,7 @@ namespace TrueSync
 
             var sum = (long)loResult + midResult1 + midResult2 + hiResult;
             TFloat result;// = default(FP);
-            result._serializedValue = sum;
+            result._rawVal = sum;
             return result;
             //return new FP(sum);
         }
@@ -401,8 +401,8 @@ namespace TrueSync
 
         public static TFloat operator /(TFloat x, TFloat y)
         {
-            var xl = x._serializedValue;
-            var yl = y._serializedValue;
+            var xl = x._rawVal;
+            var yl = y._rawVal;
 
             if (yl == 0)
             {
@@ -456,7 +456,7 @@ namespace TrueSync
             }
 
             TFloat r;
-            r._serializedValue = result;
+            r._rawVal = result;
             return r;
             //return new FP(result);
         }
@@ -464,9 +464,9 @@ namespace TrueSync
         public static TFloat operator %(TFloat x, TFloat y)
         {
             TFloat result;
-            result._serializedValue = x._serializedValue == MIN_VALUE & y._serializedValue == -1 ?
+            result._rawVal = x._rawVal == MIN_VALUE & y._rawVal == -1 ?
                 0 :
-                x._serializedValue % y._serializedValue;
+                x._rawVal % y._rawVal;
             return result;
             //return new FP(
             //    x._serializedValue == MIN_VALUE & y._serializedValue == -1 ?
@@ -481,44 +481,44 @@ namespace TrueSync
         public static TFloat FastMod(TFloat x, TFloat y)
         {
             TFloat result;
-            result._serializedValue = x._serializedValue % y._serializedValue;
+            result._rawVal = x._rawVal % y._rawVal;
             return result;
             //return new FP(x._serializedValue % y._serializedValue);
         }
 
         public static TFloat operator -(TFloat x)
         {
-            return x._serializedValue == MIN_VALUE ? MaxValue : new TFloat(-x._serializedValue);
+            return x._rawVal == MIN_VALUE ? MaxValue : new TFloat(-x._rawVal);
         }
 
         public static bool operator ==(TFloat x, TFloat y)
         {
-            return x._serializedValue == y._serializedValue;
+            return x._rawVal == y._rawVal;
         }
 
         public static bool operator !=(TFloat x, TFloat y)
         {
-            return x._serializedValue != y._serializedValue;
+            return x._rawVal != y._rawVal;
         }
 
         public static bool operator >(TFloat x, TFloat y)
         {
-            return x._serializedValue > y._serializedValue;
+            return x._rawVal > y._rawVal;
         }
 
         public static bool operator <(TFloat x, TFloat y)
         {
-            return x._serializedValue < y._serializedValue;
+            return x._rawVal < y._rawVal;
         }
 
         public static bool operator >=(TFloat x, TFloat y)
         {
-            return x._serializedValue >= y._serializedValue;
+            return x._rawVal >= y._rawVal;
         }
 
         public static bool operator <=(TFloat x, TFloat y)
         {
-            return x._serializedValue <= y._serializedValue;
+            return x._rawVal <= y._rawVal;
         }
 
 
@@ -530,7 +530,7 @@ namespace TrueSync
         /// </exception>
         public static TFloat Sqrt(TFloat x)
         {
-            var xl = x._serializedValue;
+            var xl = x._rawVal;
             if (xl < 0)
             {
                 // We cannot represent infinities like Single and Double, and Sqrt is
@@ -599,7 +599,7 @@ namespace TrueSync
             }
 
             TFloat r;
-            r._serializedValue = (long)result;
+            r._rawVal = (long)result;
             return r;
             //return new FP((long)result);
         }
@@ -613,7 +613,7 @@ namespace TrueSync
         public static TFloat Sin(TFloat x)
         {
             bool flipHorizontal, flipVertical;
-            var clampedL = ClampSinValue(x._serializedValue, out flipHorizontal, out flipVertical);
+            var clampedL = ClampSinValue(x._rawVal, out flipHorizontal, out flipVertical);
             var clamped = new TFloat(clampedL);
 
             // Find the two closest values in the LUT and perform linear interpolation
@@ -629,13 +629,13 @@ namespace TrueSync
                 SinLut.Length - 1 - (int)roundedIndex - Sign(indexError) :
                 (int)roundedIndex + Sign(indexError)]);
 
-            var delta = FastMul(indexError, FastAbs(FastSub(nearestValue, secondNearestValue)))._serializedValue;
-            var interpolatedValue = nearestValue._serializedValue + (flipHorizontal ? -delta : delta);
+            var delta = FastMul(indexError, FastAbs(FastSub(nearestValue, secondNearestValue)))._rawVal;
+            var interpolatedValue = nearestValue._rawVal + (flipHorizontal ? -delta : delta);
             var finalValue = flipVertical ? -interpolatedValue : interpolatedValue;
 
             //FP a2 = new FP(finalValue);
             TFloat a2;
-            a2._serializedValue = finalValue;
+            a2._rawVal = finalValue;
             return a2;
         }
 
@@ -647,7 +647,7 @@ namespace TrueSync
         public static TFloat FastSin(TFloat x)
         {
             bool flipHorizontal, flipVertical;
-            var clampedL = ClampSinValue(x._serializedValue, out flipHorizontal, out flipVertical);
+            var clampedL = ClampSinValue(x._rawVal, out flipHorizontal, out flipVertical);
 
             // Here we use the fact that the SinLut table has a number of entries
             // equal to (PI_OVER_2 >> 15) to use the angle to index directly into it
@@ -661,7 +661,7 @@ namespace TrueSync
                 (int)rawIndex];
 
             TFloat result;
-            result._serializedValue = flipVertical ? -nearestValue : nearestValue;
+            result._rawVal = flipVertical ? -nearestValue : nearestValue;
             return result;
             //return new FP(flipVertical ? -nearestValue : nearestValue);
         }
@@ -703,7 +703,7 @@ namespace TrueSync
         /// </summary>
         public static TFloat Cos(TFloat x)
         {
-            var xl = x._serializedValue;
+            var xl = x._rawVal;
             var rawAngle = xl + (xl > 0 ? -PI - PI_OVER_2 : PI_OVER_2);
             TFloat a2 = Sin(new TFloat(rawAngle));
             return a2;
@@ -715,7 +715,7 @@ namespace TrueSync
         /// </summary>
         public static TFloat FastCos(TFloat x)
         {
-            var xl = x._serializedValue;
+            var xl = x._rawVal;
             var rawAngle = xl + (xl > 0 ? -PI - PI_OVER_2 : PI_OVER_2);
             return FastSin(new TFloat(rawAngle));
         }
@@ -728,7 +728,7 @@ namespace TrueSync
         /// </remarks>
         public static TFloat Tan(TFloat x)
         {
-            var clampedPi = x._serializedValue % PI;
+            var clampedPi = x._rawVal % PI;
             var flip = false;
             if (clampedPi < 0)
             {
@@ -751,8 +751,8 @@ namespace TrueSync
             var nearestValue = new TFloat(TanLut[(int)roundedIndex]);
             var secondNearestValue = new TFloat(TanLut[(int)roundedIndex + Sign(indexError)]);
 
-            var delta = FastMul(indexError, FastAbs(FastSub(nearestValue, secondNearestValue)))._serializedValue;
-            var interpolatedValue = nearestValue._serializedValue + delta;
+            var delta = FastMul(indexError, FastAbs(FastSub(nearestValue, secondNearestValue)))._rawVal;
+            var interpolatedValue = nearestValue._rawVal + delta;
             var finalValue = flip ? -interpolatedValue : interpolatedValue;
             TFloat a2 = new TFloat(finalValue);
             return a2;
@@ -818,8 +818,8 @@ namespace TrueSync
 
         public static TFloat Atan2(TFloat y, TFloat x)
         {
-            var yl = y._serializedValue;
-            var xl = x._serializedValue;
+            var yl = y._rawVal;
+            var xl = x._rawVal;
             if (xl == 0)
             {
                 if (yl > 0)
@@ -890,46 +890,46 @@ namespace TrueSync
         public static implicit operator TFloat(long value)
         {
             TFloat result;
-            result._serializedValue = value * ONE;
+            result._rawVal = value * ONE;
             return result;
             //return new FP(value * ONE);
         }
 
         public static explicit operator long(TFloat value)
         {
-            return value._serializedValue >> FRACTIONAL_PLACES;
+            return value._rawVal >> FRACTIONAL_PLACES;
         }
 
         public static implicit operator TFloat(float value)
         {
             TFloat result;
-            result._serializedValue = (long)(value * ONE);
+            result._rawVal = (long)(value * ONE);
             return result;
             //return new FP((long)(value * ONE));
         }
 
         public static explicit operator float(TFloat value)
         {
-            return (float)value._serializedValue / ONE;
+            return (float)value._rawVal / ONE;
         }
 
         public static implicit operator TFloat(double value)
         {
             TFloat result;
-            result._serializedValue = (long)(value * ONE);
+            result._rawVal = (long)(value * ONE);
             return result;
             //return new FP((long)(value * ONE));
         }
 
         public static explicit operator double(TFloat value)
         {
-            return (double)value._serializedValue / ONE;
+            return (double)value._rawVal / ONE;
         }
 
         public static explicit operator TFloat(decimal value)
         {
             TFloat result;
-            result._serializedValue = (long)(value * ONE);
+            result._rawVal = (long)(value * ONE);
             return result;
             //return new FP((long)(value * ONE));
         }
@@ -937,14 +937,14 @@ namespace TrueSync
         public static implicit operator TFloat(int value)
         {
             TFloat result;
-            result._serializedValue = value * ONE;
+            result._rawVal = value * ONE;
             return result;
             //return new FP(value * ONE);
         }
 
         public static explicit operator decimal(TFloat value)
         {
-            return (decimal)value._serializedValue / ONE;
+            return (decimal)value._rawVal / ONE;
         }
 
         public readonly float AsFloat()
@@ -999,22 +999,22 @@ namespace TrueSync
 
         public override bool Equals(object obj)
         {
-            return obj is TFloat && ((TFloat)obj)._serializedValue == _serializedValue;
+            return obj is TFloat && ((TFloat)obj)._rawVal == _rawVal;
         }
 
         public override int GetHashCode()
         {
-            return _serializedValue.GetHashCode();
+            return _rawVal.GetHashCode();
         }
 
         public readonly bool Equals(TFloat other)
         {
-            return _serializedValue == other._serializedValue;
+            return _rawVal == other._rawVal;
         }
 
         public readonly int CompareTo(TFloat other)
         {
-            return _serializedValue.CompareTo(other._serializedValue);
+            return _rawVal.CompareTo(other._rawVal);
         }
 
         public readonly override string ToString()
@@ -1054,7 +1054,7 @@ namespace TrueSync
                         writer.Write("            ");
                     }
                     var acos = Math.Acos(angle);
-                    var rawValue = ((TFloat)acos)._serializedValue;
+                    var rawValue = ((TFloat)acos)._rawVal;
                     writer.Write(string.Format("0x{0:X}L, ", rawValue));
                 }
                 writer.Write(
@@ -1083,7 +1083,7 @@ namespace TrueSync
                         writer.Write("            ");
                     }
                     var sin = Math.Sin(angle);
-                    var rawValue = ((TFloat)sin)._serializedValue;
+                    var rawValue = ((TFloat)sin)._rawVal;
                     writer.Write(string.Format("0x{0:X}L, ", rawValue));
                 }
                 writer.Write(
@@ -1116,7 +1116,7 @@ namespace TrueSync
                     {
                         tan = (double)MaxValue;
                     }
-                    var rawValue = (((decimal)tan > (decimal)MaxValue || tan < 0.0) ? MaxValue : (TFloat)tan)._serializedValue;
+                    var rawValue = (((decimal)tan > (decimal)MaxValue || tan < 0.0) ? MaxValue : (TFloat)tan)._rawVal;
                     writer.Write(string.Format("0x{0:X}L, ", rawValue));
                 }
                 writer.Write(
@@ -1130,7 +1130,7 @@ namespace TrueSync
         /// <summary>
         /// The underlying integer representation
         /// </summary>
-        public long RawValue { get { return _serializedValue; } }
+        public long RawValue { get { return _rawVal; } }
 
         /// <summary>
         /// This is the constructor from raw value; it can only be used interally.
@@ -1138,12 +1138,12 @@ namespace TrueSync
         /// <param name="rawValue"></param>
         TFloat(long rawValue)
         {
-            _serializedValue = rawValue;
+            _rawVal = rawValue;
         }
 
         public TFloat(int value)
         {
-            _serializedValue = value * ONE;
+            _rawVal = value * ONE;
         }
     }
 }

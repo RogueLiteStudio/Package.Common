@@ -7,7 +7,7 @@ namespace TrueSync
         public static TFloat ReadTFloat(this BinaryReader reader)
         {
             TFloat result;
-            result._serializedValue = reader.ReadInt64();
+            result._rawVal = reader.ReadInt64();
             return result;
         }
 

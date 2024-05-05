@@ -1,5 +1,10 @@
 ﻿using System.Collections.Generic;
 
+public class EmptyArray<T>
+{
+    public static readonly T[] Instance = new T[0];
+}
+
 public static class CollectionUtil
 {
     public static bool IsEmpty<T>(this T[] array)

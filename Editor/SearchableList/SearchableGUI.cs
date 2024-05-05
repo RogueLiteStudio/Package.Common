@@ -70,7 +70,6 @@ public static class SearchableGUI
         var item = list.FirstOrDefault(it => it.Key == selectKey);
         string showText = string.IsNullOrEmpty(item.Value) ? selectKey.ToString() : item.Value;
         int controllId = GetControlID(position);
-        GUI.backgroundColor
         if (GUI.Button(position, showText, EditorStyles.popup))
         {
             SearchablePopup<string>.ControllId = controllId;
@@ -79,7 +78,20 @@ public static class SearchableGUI
         return SearchablePopup<string>.GetSelectKey(selectKey, controllId);
     }
 
-
+    public static string PopString(Rect position, string selectKey, IEnumerable<string> list)
+    {
+        if (selectKey == null)
+            selectKey = "";
+        var item = list.FirstOrDefault(it => it == selectKey);
+        string showText = string.IsNullOrEmpty(item) ? selectKey : item;
+        int controllId = GetControlID(position);
+        if (GUI.Button(position, showText, EditorStyles.popup))
+        {
+            SearchablePopup<string>.ControllId = controllId;
+            SearchablePopup<string>.Popup(position, selectKey, list.Select((it)=>new KeyValuePair<string, string>(it, it)), new SearchablePopup<string>());
+        }
+        return SearchablePopup<string>.GetSelectKey(selectKey, controllId);
+    }
     public static T PopEnum<T>(Rect position, T selectKey) where T : System.Enum
     {
         int controllId = GetControlID(position);

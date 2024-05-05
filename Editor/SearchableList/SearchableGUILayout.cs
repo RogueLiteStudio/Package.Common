@@ -26,8 +26,22 @@ public static class SearchableGUILayout
         var position = EditorGUILayout.GetControlRect(false, 18f, EditorStyles.popup, options);
         return SearchableGUI.PopString(position, selectKey, list);
     }
+    public static string PopString(string selectKey, IEnumerable<string> list, params GUILayoutOption[] options)
+    {
+        var position = EditorGUILayout.GetControlRect(false, 18f, EditorStyles.popup, options);
+        return SearchableGUI.PopString(position, selectKey, list);
+    }
 
     public static string PopString(string lable, string selectKey, IEnumerable<KeyValuePair<string, string>> list, params GUILayoutOption[] options)
+    {
+        using (new GUILayout.HorizontalScope())
+        {
+            GUILayout.Label(lable);
+            var position = EditorGUILayout.GetControlRect(false, 18f, EditorStyles.popup, options);
+            return SearchableGUI.PopString(position, selectKey, list);
+        }
+    }
+    public static string PopString(string lable, string selectKey, IEnumerable<string> list, params GUILayoutOption[] options)
     {
         using (new GUILayout.HorizontalScope())
         {

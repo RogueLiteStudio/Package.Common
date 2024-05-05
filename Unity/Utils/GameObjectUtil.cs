@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public static class GameObjectUtil
 {
@@ -29,5 +30,15 @@ public static class GameObjectUtil
     public static Transform RecursiveFindChild(this GameObject root, string name, bool ignoreCase = false)
     {
         return RecursiveFindChild(root.transform, name, false);
+    }
+
+    public static void CollectNodes(this Transform root, List<string> bones)
+    {
+        for (int i=0; i<root.childCount; ++i)
+        {
+            var child = root.GetChild(i);
+            bones.Add(child.name);
+            CollectNodes(child, bones);
+        }
     }
 }

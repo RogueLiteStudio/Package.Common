@@ -15,7 +15,7 @@ public enum SdpLitePackType
     All = 3,
 }
 
-[AttributeUsage(AttributeTargets.Struct | AttributeTargets.Class, Inherited= true, AllowMultiple = true)]
+[AttributeUsage(AttributeTargets.Struct | AttributeTargets.Class, Inherited= false, AllowMultiple = false)]
 public abstract class SdpLiteCatalogAttribute : Attribute
 {
     public abstract string GenerateRooPath { get; }//生成代码的根目录

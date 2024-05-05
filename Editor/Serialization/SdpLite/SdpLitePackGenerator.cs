@@ -19,10 +19,24 @@ public struct SdpLitePackGenerator : ISdpLiteCodeGenerator
                 writer.WriteLine($"Pack(packer, {field.Index}, false, value.{field.Info.Name});");
                 break;
             case SdpLiteStructType.Vector:
-                writer.WriteLine($"Pack(packer, {field.Index}, false, value.{field.Info.Name}, Pack);");
+                if (field.ExternType1 < SdpLiteStructType.String)
+                {
+                    //处理基础类型的隐式转换
+                    writer.WriteLine($"Pack(packer, {field.Index}, false, value.{field.Info.Name}, SdpLitePacker.Pack);");
+                }
+                else
+                {
+                    writer.WriteLine($"Pack(packer, {field.Index}, false, value.{field.Info.Name}, Pack);");
+                }
                 break;
             case SdpLiteStructType.Map:
-                writer.WriteLine($"Pack(packer, {field.Index}, false, value.{field.Info.Name}, Pack, Pack);");
+                string keyPack = "Pack";
+                if (field.ExternType1 < SdpLiteStructType.String)
+                    keyPack = "SdpLitePacker.Pack";
+                string valuePack = "Pack";
+                if (field.ExternType2 < SdpLiteStructType.String)
+                    valuePack = "SdpLitePacker.Pack";
+                writer.WriteLine($"Pack(packer, {field.Index}, false, value.{field.Info.Name}, {keyPack}, {valuePack});");
                 break;
         }
     }

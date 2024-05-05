@@ -142,9 +142,6 @@ public class SearchablePopup<TKey> : PopupWindowContent
         }
     }
 
-    private static readonly GUIStyle SearchBox = "ToolbarSeachTextField";
-    private static readonly GUIStyle CancelButton = "ToolbarSeachCancelButton";
-    private static readonly GUIStyle DisabledCancelButton = "ToolbarSeachCancelButtonEmpty";
     private static readonly GUIStyle Selection = "SelectionRect";
 
     private const string SEARCH_CONTROL_NAME = "EnumSearchText";
@@ -157,12 +154,12 @@ public class SearchablePopup<TKey> : PopupWindowContent
         searchRect.xMin += 6;
         searchRect.xMax -= 6;
         searchRect.y += 2;
-        searchRect.width -= CancelButton.fixedWidth;
+        searchRect.width -= 20;
 
         GUI.FocusControl(SEARCH_CONTROL_NAME);
         GUI.SetNextControlName(SEARCH_CONTROL_NAME);
         EditorGUI.BeginChangeCheck();
-        searchContent = GUI.TextField(searchRect, searchContent, SearchBox);
+        searchContent = GUI.TextField(searchRect, searchContent);
         if (EditorGUI.EndChangeCheck())
         {
             Filter(searchContent);
@@ -171,11 +168,11 @@ public class SearchablePopup<TKey> : PopupWindowContent
         }
 
         searchRect.x = searchRect.xMax;
-        searchRect.width = CancelButton.fixedWidth;
+        searchRect.width = 20;
 
         if (string.IsNullOrEmpty(searchContent))
-            GUI.Box(searchRect, GUIContent.none, DisabledCancelButton);
-        else if (GUI.Button(searchRect, "x", CancelButton))
+            GUI.Box(searchRect, GUIContent.none);
+        else if (GUI.Button(searchRect, "x", EditorStyles.miniButton))
         {
             searchContent = "";
             Filter(searchContent);

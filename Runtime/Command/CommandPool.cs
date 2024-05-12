@@ -23,6 +23,7 @@ public class CommandPool<T> where T : ICommand, new()
 
     public static void Recyle(T command)
     {
+        CommandReset<T>.Reset(command);
         pool.Add(command);
     }
 }

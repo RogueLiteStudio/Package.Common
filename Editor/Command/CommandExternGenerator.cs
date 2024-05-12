@@ -1,16 +1,38 @@
 ﻿using CodeGen;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 
 internal static class CommandExternGenerator
 {
-    public static void GenExtern(string exportPath, CommandGenerator.CommandInfo info)
+    public static void GenExtern(string exportPath, CommandGenerator.CommandInfo info, Func<System.Type, string, string> customReset)
     {
+        //reset 文件
+        CSharpCodeWriter writer = new CSharpCodeWriter();
+        string resetFile = Path.Combine(exportPath, $"{info.ContextName}Reset.cs");
+        HashSet<Type> resetTypes = new HashSet<Type>();
+        using (new CSharpCodeWriter.Scop(writer, $"public static partial class {info.ContextName}Extern"))
+        {
+            foreach (var type in info.Types)
+            {
+                var fields = type.GetFields().Where(it => it.IsPublic && !it.IsStatic).ToList();
+                if (fields.Count() == 0)
+                    continue;
+                resetTypes.Add(type);
+                writer.WriteLine($"public static void Reset({GeneratorUtils.TypeToName(type)} value)");
+                using (new CSharpCodeWriter.Scop(writer))
+                {
+                    GeneratorUtils.WriteReset(writer, fields, customReset);
+                }
+            }
+        }
+        FileUtil.WriteFile(resetFile, writer.ToString());
         //生成ID文件
         string idFile = Path.Combine(exportPath, $"{info.ContextName}Ids.cs");
-        CSharpCodeWriter writer = new CSharpCodeWriter();
+        writer = new CSharpCodeWriter();
         using (new CSharpCodeWriter.Scop(writer, $"public static partial class {info.ContextName}Extern"))
         {
             using (new CSharpCodeWriter.Scop(writer, "public static void Init()"))
@@ -19,11 +41,14 @@ internal static class CommandExternGenerator
                 foreach (var type in info.Types)
                 {
                     writer.WriteLine($"CommandIdentity<{GeneratorUtils.TypeToName(type)}>.Id = {idx++};");
+                    if (resetTypes.Contains(type))
+                    {
+                        writer.WriteLine($"CommandReset<{GeneratorUtils.TypeToName(type)}>.onReset = Reset;");
+                    }
                 }
 
             }
         }
-
         FileUtil.WriteFile(idFile, writer.ToString());
 
         string externFile = Path.Combine(exportPath, $"{info.ContextName}Extern.cs");

@@ -8,7 +8,7 @@ using System.Text;
 
 internal static class CommandExternGenerator
 {
-    public static void GenExtern(string exportPath, CommandGenerator.CommandInfo info, Func<System.Type, string, string> customReset)
+    public static void GenExtern(string exportPath, CommandGenerator.CommandInfo info, Func<Type, string, string> customReset)
     {
         //reset 文件
         CSharpCodeWriter writer = new CSharpCodeWriter();

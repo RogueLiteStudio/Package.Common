@@ -11,7 +11,7 @@ public static class CommandGenerator
         public string ContextName;
     }
 
-    public static void GenCommand<TCommand, TExecuteContext, TExecute>(string externPayh, string executePath, Func<System.Type, string, string> customReset = null) where TCommand : ICommand
+    public static void GenCommand<TCommand, TExecuteContext, TExecute>(string externPayh, string executePath, Func<Type, string, string> customReset = null) where TCommand : ICommand
     {
         var types = TypeCollector<TCommand>.Types;
         CommandInfo info = new CommandInfo();

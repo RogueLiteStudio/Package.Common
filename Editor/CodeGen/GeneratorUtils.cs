@@ -82,7 +82,7 @@ namespace CodeGen
             File.WriteAllText(filePath, context, Encoding.UTF8);
         }
 
-        public static void WriteReset(CSharpCodeWriter writer, List<FieldInfo> fields, System.Func<System.Type, string, string> customReset)
+        public static void WriteReset(CSharpCodeWriter writer, List<FieldInfo> fields, Func<Type, string, string> customReset)
         {
             foreach (var field in fields)
             {

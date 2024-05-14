@@ -1,5 +1,6 @@
 ﻿using UnityEditor;
 using UnityEngine;
+using System.Collections.Generic;
 
 [CustomEditor(typeof(PrefabSaveBinder))]
 public class PrefabSaveBinderInpsector : Editor
@@ -61,16 +62,51 @@ public class PrefabSaveBinderInpsector : Editor
                 path += binder.name + ".prefab";
             }
             var flag = binder.hideFlags;
+            List<PrefabSaveAction> actions = new List<PrefabSaveAction>();
+            List<PrefabSaveActionInspector> inspectors = new List<PrefabSaveActionInspector>();
+            binder.GetComponents(actions);
+            foreach (var action in actions)
+            {
+                if (!action.SaveToPrefab)
+                {
+                    action.hideFlags = HideFlags.DontSave;
+                }
+                PrefabSaveActionInspector editor = CreateEditor(action) as PrefabSaveActionInspector;
+                inspectors.Add(editor);
+            }
             try
             {
                 binder.hideFlags = HideFlags.DontSave;
+                foreach (var editor in inspectors)
+                {
+                    editor.OnPreSave(binder.gameObject, path);
+                }
                 PrefabUtility.SaveAsPrefabAsset(binder.gameObject, path);
+                foreach (var editor in inspectors)
+                {
+                    editor.OnPostSave(binder.gameObject, path);
+                }
+                var content = PrefabUtility.LoadPrefabContents(path);
+                foreach (var editor in inspectors)
+                {
+                    editor.OnPrefabContent(content, path);
+                }
+                PrefabUtility.SaveAsPrefabAsset(content, path);
+                PrefabUtility.UnloadPrefabContents(content);
             }
             catch (System.Exception ex)
             {
                 Debug.LogException(ex);
             }
             binder.hideFlags = flag;
+            foreach (var action in actions)
+            {
+                action.hideFlags = HideFlags.None;
+            }
+            foreach (var editor in inspectors)
+            {
+                DestroyImmediate(editor);
+            }
         }
     }
 }

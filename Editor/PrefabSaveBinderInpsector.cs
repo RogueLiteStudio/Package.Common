@@ -62,6 +62,15 @@ public class PrefabSaveBinderInpsector : Editor
                 path += binder.name + ".prefab";
             }
             var flag = binder.hideFlags;
+            var transfom = binder.transform;
+            Vector3 position = transfom.position;
+            Quaternion rotation = transfom.rotation;
+            Vector3 scale = transfom.localScale;
+
+            transfom.position = Vector3.zero;
+            transfom.rotation = Quaternion.identity;
+            transfom.localScale = Vector3.one;
+
             List<PrefabSaveAction> actions = new List<PrefabSaveAction>();
             List<PrefabSaveActionInspector> inspectors = new List<PrefabSaveActionInspector>();
             binder.GetComponents(actions);
@@ -98,6 +107,9 @@ public class PrefabSaveBinderInpsector : Editor
             {
                 Debug.LogException(ex);
             }
+            transfom.position = position;
+            transfom.rotation = rotation;
+            transfom.localScale = scale;
             binder.hideFlags = flag;
             foreach (var action in actions)
             {

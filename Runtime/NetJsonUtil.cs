@@ -18,6 +18,7 @@ public class NetJsonUtil
     private static JsonSerializerSettings _jsonSerializerWriteableSettings = new JsonSerializerSettings
     {
         TypeNameHandling = TypeNameHandling.Auto,
+        TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Full,
         DefaultValueHandling = DefaultValueHandling.Ignore,
         ContractResolver = new JsonPropertyContractResolver()
     };

@@ -12,6 +12,7 @@ public class InpectorElement : VisualElement
     private VisualElement bottom;
     public override VisualElement contentContainer => bottom;
     public System.Action<GenericMenu> OnContextMenue;
+    public System.Action<bool> OnEnableAction;
     public string Text
     {
         get
@@ -34,6 +35,10 @@ public class InpectorElement : VisualElement
             foldout.value = !foldout.value;
             evt.StopPropagation();
         });
+        toggle.RegisterValueChangedCallback(evt =>
+        { 
+            OnEnableAction?.Invoke(evt.newValue);
+        });
         top.Add(foldout);
         top.Add(toggle);
         top.Add(label);
@@ -48,7 +53,6 @@ public class InpectorElement : VisualElement
         foldout.RegisterValueChangedCallback(evt =>
         {
             bottom.style.display = evt.newValue ? DisplayStyle.Flex : DisplayStyle.None;
-            evt.StopPropagation();
         });
     }
 

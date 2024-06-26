@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 
-public class InpectorElement : VisualElement
+public class InspectorElement : VisualElement
 {
 
     private IMGUIContainer top = new IMGUIContainer();
@@ -25,7 +25,7 @@ public class InpectorElement : VisualElement
         }
     }
 
-    public InpectorElement()
+    public InspectorElement()
     {
         foldout.style.top = 2;
         toggle.style.top = 2;
